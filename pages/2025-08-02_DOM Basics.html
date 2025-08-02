@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      DOMとは？ウェブページの「縁の下の力持ち」を世界一わかりやすく解説します！
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* InterフォントとNoto Sans JPの読み込み */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap");
+
+      body {
+        font-family: "Inter", "Noto Sans JP", sans-serif;
+        color: #333333; /* 基本テキストカラー */
+        background-color: #f4f7f9; /* 背景色を少し明るく */
+      }
+
+      /* リンクスタイル */
+      a {
+        color: #005496; /* デジタル庁のリンクカラーに近い色 */
+        text-decoration: underline;
+      }
+      a:hover,
+      a:focus {
+        color: #003c6f; /* ホバー・フォーカス時の色 */
+        text-decoration: none;
+      }
+
+      /* 見出しスタイル */
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-weight: 700; /* Noto Sans JPのBold */
+        margin-top: 1.8em;
+        margin-bottom: 0.8em;
+        line-height: 1.4;
+      }
+      h1 {
+        font-size: 2rem;
+      } /* 32px */
+      h2 {
+        font-size: 1.75rem;
+      } /* 28px */
+      h3 {
+        font-size: 1.375rem;
+      } /* 22px */
+      h4 {
+        font-size: 1.125rem;
+      } /* 18px */
+
+      /* コードブロックのスタイル */
+      pre {
+        background-color: #f0f0f0; /* 薄いグレー */
+        border: 1px solid #e0e0e0;
+        border-radius: 0.375rem; /* rounded-md */
+        padding: 1rem;
+        overflow-x: auto; /* 横スクロール */
+        font-size: 0.9em;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+      pre code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+          Courier, monospace;
+        color: #222; /* コード内の文字色を少し濃く */
+      }
+
+      /* 目次のスタイル */
+      #toc-container {
+        /* PC表示ではstickyにするが、スマホでは解除される */
+      }
+      #toc-container ul {
+        list-style: none;
+        padding-left: 0;
+      }
+      #toc-container ul ul {
+        padding-left: 1rem; /* インデント */
+      }
+      #toc-container li a {
+        display: block;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.875rem; /* 14px */
+        text-decoration: none;
+        color: #333333;
+        border-radius: 0.25rem;
+      }
+      #toc-container li a:hover,
+      #toc-container li a.active {
+        color: #005496;
+        background-color: #e6f0f7; /* ホバー時背景色 */
+        font-weight: bold;
+      }
+
+      /* メインコンテンツエリアのスタイル */
+      .content-body p,
+      .content-body ul,
+      .content-body ol {
+        margin-bottom: 1.25rem;
+        line-height: 1.8; /* 行間を広めに */
+        font-size: 1rem; /* 16px */
+      }
+      .content-body ul:not(.browser-default), /* Tailwindのlist-discなどを活かすため */
+        .content-body ol:not(.browser-default) {
+        padding-left: 1.75rem;
+      }
+      .content-body ul:not(.browser-default) {
+        list-style-type: disc;
+      }
+      .content-body ol:not(.browser-default) {
+        list-style-type: decimal;
+      }
+      .content-body strong {
+        font-weight: 700; /* Noto Sans JPのBold */
+      }
+      .content-body blockquote {
+        border-left: 4px solid #005496;
+        padding-left: 1rem;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+        color: #555;
+      }
+
+      /* スマホ用目次トグルボタン */
+      #toc-toggle-button {
+        background-color: #005496;
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.375rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      #toc-toggle-button:hover {
+        background-color: #003c6f;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 antialiased">
+    <header class="bg-white shadow-sm py-5 sticky top-0 z-50">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center">
+          DOMとは？ウェブページの「縁の下の力持ち」を世界一わかりやすく解説します！
+        </h1>
+      </div>
+    </header>
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex flex-col lg:flex-row lg:space-x-8">
+        <aside class="lg:w-1/4 mb-8 lg:mb-0 lg:sticky lg:top-24 self-start">
+          <button id="toc-toggle-button" class="lg:hidden w-full">
+            目次を開く / 閉じる
+          </button>
+          <div
+            id="toc-container"
+            class="hidden lg:block bg-white p-4 sm:p-6 rounded-lg shadow-md"
+          >
+            <h2
+              class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-700"
+            >
+              目次
+            </h2>
+            <nav id="toc">
+              <ul class="space-y-1">
+                <li>
+                  <a href="#section1">1. DOMって、そもそも何者？</a>
+                  <ul class="mt-1 space-y-1">
+                    <li><a href="#section1-1">1.1. なぜDOMが必要なの？</a></li>
+                  </ul>
+                </li>
+                <li><a href="#section2">2. DOMの正体をもっと詳しく！</a></li>
+                <li>
+                  <a href="#section3">3. DOMの役割</a>
+                  <ul class="mt-1 space-y-1">
+                    <li><a href="#section3-1">3.1. 要素の取得</a></li>
+                    <li><a href="#section3-2">3.2. 要素の変更</a></li>
+                    <li><a href="#section3-3">3.3. 要素の追加と削除</a></li>
+                    <li><a href="#section3-4">3.4. イベント処理</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#section4">4. DOM操作の実際</a>
+                  <ul class="mt-1 space-y-1">
+                    <li><a href="#section4-1">4.1. 例1：テキスト変更</a></li>
+                    <li><a href="#section4-2">4.2. 例2：入力内容表示</a></li>
+                    <li><a href="#section4-3">4.3. 例3：リスト項目追加</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#section5">5. DOMとJSフレームワーク</a>
+                  <ul class="mt-1 space-y-1">
+                    <li><a href="#section5-1">5.1. jQuery</a></li>
+                    <li><a href="#section5-2">5.2. 現代の主流と仮想DOM</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#section6">6. DOM扱う注意点とベストプラクティス</a>
+                  <ul class="mt-1 space-y-1">
+                    <li><a href="#section6-1">6.1. パフォーマンス</a></li>
+                    <li><a href="#section6-2">6.2. セキュリティ</a></li>
+                    <li><a href="#section6-3">6.3. 可読性と保守性</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#section7">7. DOMの未来と発展</a>
+                  <ul class="mt-1 space-y-1">
+                    <li>
+                      <a href="#section7-1"
+                        >7.1. Web Components と Shadow DOM</a
+                      >
+                    </li>
+                    <li><a href="#section7-2">7.2. 新しいAPI</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#section8">8. DOMを学ぶ次のステップ</a>
+                  <ul class="mt-1 space-y-1">
+                    <li><a href="#section8-1">8.1. 学習リソース</a></li>
+                    <li><a href="#section8-2">8.2. 実践の重要性</a></li>
+                  </ul>
+                </li>
+                <li><a href="#section9">9. おわりに</a></li>
+              </ul>
+            </nav>
+          </div>
+        </aside>
+
+        <article
+          class="lg:w-3/4 bg-white p-6 sm:p-8 rounded-lg shadow-md content-body"
+        >
+          <section id="section1" aria-labelledby="section1-title">
+            <h2 id="section1-title">
+              1. DOMって、そもそも何者？
+              ～ウェブページの舞台裏をのぞいてみよう～
+            </h2>
+            <p>
+              普段私たちが見ているウェブページは、大きく分けて3つの要素でできています。
+            </p>
+            <ul class="browser-default list-disc pl-5 space-y-1">
+              <li>
+                <strong>HTML (エイチティーエムエル)</strong
+                >：ウェブページの「骨組み」や「内容」を決める言語です。「ここに見出しを置こう」「ここに画像を表示しよう」といった、ページの構造を記述します。
+              </li>
+              <li>
+                <strong>CSS (シーエスエス)</strong
+                >：ウェブページの「見た目」を整える言語です。「文字の色を赤にしよう」「背景を青にしよう」といった、デザインを担当します。
+              </li>
+              <li>
+                <strong>JavaScript (ジャバスクリプト)</strong
+                >：ウェブページに「動き」をつけるプログラミング言語です。「ボタンが押されたらメッセージを表示する」「画像が自動で切り替わる」といった、インタラクティブな機能を実現します。
+              </li>
+            </ul>
+            <p>
+              さて、ここで登場するのが<strong
+                >DOM (Document Object Model / ドキュメント オブジェクト
+                モデル)</strong
+              >
+              です。
+            </p>
+            <p>
+              簡単に言うと、<strong
+                >DOMは、HTML文書をJavaScriptなどのプログラムが理解し、操作できるようにするための「橋渡し役」</strong
+              >
+              のようなものです。
+            </p>
+            <p>
+              HTMLで書かれたウェブページの骨組みを、プログラムが「ここに見出しがあるな」「ここにボタンがあるな」と認識できるように、特別な形（オブジェクトの集まり）に変換してくれるのです。
+            </p>
+            <p><strong>例えるなら…</strong></p>
+            <ul class="browser-default list-disc pl-5 space-y-1">
+              <li><strong>HTML</strong>：家の「設計図」</li>
+              <li>
+                <strong>DOM</strong
+                >：設計図をもとに建てられた「家の模型」。模型なら、部屋の壁紙を変えたり、家具を動かしたりしやすいですよね？
+              </li>
+              <li>
+                <strong>JavaScript</strong
+                >：模型を操作する「魔法の手」。この手で模型の壁紙を変えたり、新しい家具を追加したりします。
+              </li>
+            </ul>
+            <p>
+              DOMがあるおかげで、JavaScriptはウェブページの内容を読み取ったり、見た目を変えたり、新しい要素を追加したり、といった操作が自由自在にできるようになります。つまり、私たちが普段体験している「動的なウェブページ」の実現には、DOMが不可欠なのです。
+            </p>
+
+            <section
+              id="section1-1"
+              aria-labelledby="section1-1-title"
+              class="mt-6"
+            >
+              <h3 id="section1-1-title">1.1. なぜDOMが必要なの？</h3>
+              <p>
+                もしDOMがなかったら、JavaScriptはHTML文書をただの長い文字列としてしか認識できません。「この文字列の何文字目から何文字目までが見出しです」といった非常に面倒な方法でしか情報を扱えず、ページの特定の部分をピンポイントで変更するなんてことは至難の業です。
+              </p>
+              <p>
+                DOMは、HTML文書を<strong>ツリー構造</strong>という階層的な構造で表現します。これは、大きな幹から枝が伸び、さらにその枝から葉が茂るようなイメージです。このツリー構造のおかげで、プログラムは「どの要素がどの要素の子要素か」といった関係性を正確に把握し、目的の要素に簡単にアクセスできるようになります。
+              </p>
+            </section>
+          </section>
+
+          <section id="section2" aria-labelledby="section2-title" class="mt-10">
+            <h2 id="section2-title">
+              2. DOMの正体をもっと詳しく！
+              ～「ドキュメント」「オブジェクト」「モデル」って何？～
+            </h2>
+            <p>
+              DOMという名前は、「Document」「Object」「Model」という3つの言葉から成り立っています。それぞれの意味を見ていきましょう。
+            </p>
+            <ul class="browser-default list-disc pl-5 space-y-2">
+              <li>
+                <strong>Document (ドキュメント)</strong><br />
+                これは、ブラウザが読み込んだ<strong>HTML文書そのもの</strong>を指します。私たちがウェブページとして見ている、あのHTMLファイルのことですね。DOMは、このHTML文書を対象としています。
+              </li>
+              <li>
+                <strong>Object (オブジェクト)</strong><br />
+                これは、プログラムの世界でよく使われる言葉で、「モノ」や「対象」といった意味合いです。DOMの世界では、HTML文書の中にある<strong>一つ一つの要素（見出し、段落、画像、リンクなど）が、それぞれ独立した「オブジェクト」として扱われます</strong>。<br />
+                オブジェクトになることで、それぞれの要素が持つ情報（例えば、見出しのテキスト内容、画像ファイルの場所、リンク先のURLなど）や、それに対して行える操作（例えば、テキストを書き換える、画像を変える、リンクを無効にするなど）が明確になります。JavaScriptは、これらのオブジェクトを操作することで、ウェブページを変化させます。
+              </li>
+              <li>
+                <strong>Model (モデル)</strong><br />
+                これは、「模型」や「構造」といった意味です。DOMは、HTML文書の構造を、プログラムが扱いやすい<strong>論理的な「モデル」として表現します</strong>。具体的には、前述した<strong>ツリー構造</strong>（木のような階層構造）で表現されます。
+              </li>
+            </ul>
+            <p class="mt-4">例えば、以下のような簡単なHTMLがあったとします。</p>
+            <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;私のウェブページ&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;こんにちは！&lt;/h1&gt;
+    &lt;p&gt;DOMの世界へようこそ。&lt;/p&gt;
+    &lt;button&gt;クリックしてね&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            <p>このHTMLをDOMで表現すると、以下のようなツリー構造になります。</p>
+            <pre><code class="language-text">Document
+└── html
+    ├── head
+    │   └── title
+    │       └── "私のウェブページ" (テキストノード)
+    └── body
+        ├── h1
+        │   └── "こんにちは！" (テキストノード)
+        ├── p
+        │   └── "DOMの世界へようこそ。" (テキストノード)
+        └── button
+            └── "クリックしてね" (テキストノード)</code></pre>
+            <p>
+              このツリー構造では、一番上に「Document」があり、その下に「html」要素、さらにその下に「head」や「body」要素…というように、HTMLの親子関係がそのまま反映されています。各要素の中にあるテキストも、「テキストノード」という特別な種類のオブジェクトとして扱われます。
+            </p>
+            <p>
+              このように、HTML文書を階層的なオブジェクトの集まりとしてモデル化することで、JavaScriptは「body要素の中の最初のh1要素のテキストを取得する」といった具体的な指示を理解し、実行できるようになるのです。
+            </p>
+          </section>
+
+          <section id="section3" aria-labelledby="section3-title" class="mt-10">
+            <h2 id="section3-title">
+              3. DOMの役割：一体何ができるの？
+              ～ウェブページを自由自在に操る魔法～
+            </h2>
+            <p>
+              DOMを理解すると、JavaScriptを使ってウェブページに対して本当にたくさんのことができるようになります。主な役割を見ていきましょう。
+            </p>
+            <section
+              id="section3-1"
+              aria-labelledby="section3-1-title"
+              class="mt-6"
+            >
+              <h3 id="section3-1-title">
+                3.1.
+                要素の取得：ウェブページの中からお目当ての部品を見つけ出す！
+              </h3>
+              <p>
+                ウェブページを操作する最初のステップは、操作したいHTML要素（部品）を特定することです。DOMは、そのための便利な道具（メソッド）をたくさん用意しています。
+              </p>
+              <ul class="browser-default list-disc pl-5 space-y-3">
+                <li>
+                  <strong><code>document.getElementById('ID名')</code></strong
+                  ><br />
+                  HTML要素に付けられた固有の「ID名」を手がかりに、その要素をピンポイントで見つけ出します。IDは一つのHTML文書内でユニーク（一つだけ）でなければならないため、最も確実な方法の一つです。
+                  <pre><code class="language-html">&lt;h1 id="main-title"&gt;ようこそ！&lt;/h1&gt;</code></pre>
+                  <pre><code class="language-javascript">// IDが "main-title" の要素を取得
+const titleElement = document.getElementById('main-title');
+console.log(titleElement.textContent); // "ようこそ！" と表示されます</code></pre>
+                </li>
+                <li>
+                  <strong
+                    ><code
+                      >document.getElementsByTagName('タグ名')</code
+                    ></strong
+                  ><br />
+                  指定された「タグ名」（例：<code>p</code>、<code>div</code>、<code>img</code>など）を持つ要素をすべて見つけ出します。結果は複数になる可能性があるので、配列のような形（HTMLCollection）で返ってきます。
+                  <pre><code class="language-html">&lt;p&gt;これは最初の段落です。&lt;/p&gt;
+&lt;p&gt;これは二番目の段落です。&lt;/p&gt;</code></pre>
+                  <pre><code class="language-javascript">// すべての p 要素を取得
+const paragraphs = document.getElementsByTagName('p');
+console.log(paragraphs.length); // 2 と表示されます
+console.log(paragraphs[0].textContent); // "これは最初の段落です。"</code></pre>
+                </li>
+                <li>
+                  <strong
+                    ><code
+                      >document.getElementsByClassName('クラス名')</code
+                    ></strong
+                  ><br />
+                  指定された「クラス名」を持つ要素をすべて見つけ出します。クラス名は複数の要素に同じ名前を付けることができるため、これも結果は複数になる可能性があります（HTMLCollection）。
+                  <pre><code class="language-html">&lt;div class="highlight"&gt;重要なお知らせ&lt;/div&gt;
+&lt;p class="highlight"&gt;これも重要です。&lt;/p&gt;</code></pre>
+                  <pre><code class="language-javascript">// "highlight" というクラス名を持つ要素をすべて取得
+const highlightedElements = document.getElementsByClassName('highlight');
+console.log(highlightedElements.length); // 2 と表示されます</code></pre>
+                </li>
+                <li>
+                  <strong
+                    ><code>document.querySelector('CSSセレクタ')</code></strong
+                  ><br />
+                  CSSのセレクタと同じ書き方で、条件に一致する最初の要素を一つだけ見つけ出します。非常に強力で柔軟な方法です。
+                  <pre><code class="language-html">&lt;div id="container"&gt;
+    &lt;p class="info"&gt;情報1&lt;/p&gt;
+    &lt;p class="info"&gt;情報2&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                  <pre><code class="language-javascript">// idが "container" の中の、classが "info" の最初の要素を取得
+const firstInfo = document.querySelector('#container .info');
+console.log(firstInfo.textContent); // "情報1"</code></pre>
+                </li>
+                <li>
+                  <strong
+                    ><code
+                      >document.querySelectorAll('CSSセレクタ')</code
+                    ></strong
+                  ><br />
+                  <code>querySelector</code>
+                  と似ていますが、CSSセレクタに一致する要素を<strong>すべて</strong>見つけ出します。結果はNodeListという形で返ってきます。
+                  <pre><code class="language-javascript">// idが "container" の中の、classが "info" のすべての要素を取得
+const allInfoElements = document.querySelectorAll('#container .info');
+console.log(allInfoElements.length); // 2
+allInfoElements.forEach(element =&gt; {
+    console.log(element.textContent); // "情報1", "情報2" が順に表示
+});</code></pre>
+                </li>
+              </ul>
+              <p class="mt-3">
+                これらのメソッドを使いこなせば、ウェブページ上のどんな要素にもアクセスできるようになります。
+              </p>
+            </section>
+            <section
+              id="section3-2"
+              aria-labelledby="section3-2-title"
+              class="mt-6"
+            >
+              <h3 id="section3-2-title">
+                3.2. 要素の変更：見つけた部品の見た目や内容を変える！
+              </h3>
+              <p>
+                目的の要素を見つけたら、次はその要素を変化させてみましょう。DOMを使えば、テキストの内容、属性（要素が持つ追加情報）、見た目（スタイル）などを自由に変更できます。
+              </p>
+              <ul class="browser-default list-disc pl-5 space-y-3">
+                <li>
+                  <strong>テキスト内容の変更</strong>
+                  <ul class="browser-default list-circle pl-5 mt-1 space-y-1">
+                    <li>
+                      <code>textContent</code
+                      >：要素内のテキストだけを変更します。HTMLタグは解釈されません（安全性が高い）。
+                    </li>
+                    <li>
+                      <code>innerHTML</code
+                      >：要素内のHTML構造ごと変更します。HTMLタグも解釈されるため、新しいHTML要素を挿入できますが、使い方を誤るとセキュリティ上のリスク（XSS：クロスサイトスクリプティング）が生じる可能性があります。
+                    </li>
+                  </ul>
+                  <pre><code class="language-html">&lt;p id="message"&gt;こんにちは&lt;/p&gt;</code></pre>
+                  <pre><code class="language-javascript">const messageElement = document.getElementById('message');
+
+// テキスト内容を変更 (textContent)
+messageElement.textContent = "さようなら"; // 表示が「さようなら」に変わる
+
+// HTMLごと内容を変更 (innerHTML) - 慎重に使いましょう
+// messageElement.innerHTML = "&lt;strong&gt;またね！&lt;/strong&gt;"; // 表示が太字の「またね！」に変わる</code></pre>
+                </li>
+                <li>
+                  <strong>属性の変更</strong><br />
+                  HTML要素は、<code>src</code>（画像）、<code>href</code>（リンク）、<code>class</code>、<code>id</code>など、さまざまな属性を持っています。これらの属性値を変更したり、新しく追加したり、削除したりできます。
+                  <ul class="browser-default list-circle pl-5 mt-1 space-y-1">
+                    <li>
+                      <code>getAttribute('属性名')</code
+                      >：指定した属性の値を取得します。
+                    </li>
+                    <li>
+                      <code>setAttribute('属性名', '新しい値')</code
+                      >：指定した属性に新しい値を設定します（属性がなければ新しく作られます）。
+                    </li>
+                    <li>
+                      <code>removeAttribute('属性名')</code
+                      >：指定した属性を削除します。
+                    </li>
+                  </ul>
+                  <pre><code class="language-html">&lt;img id="myImage" src="image1.jpg" alt="最初の画像"&gt;
+&lt;a id="myLink" href="old-page.html"&gt;古いページ&lt;/a&gt;</code></pre>
+                  <pre><code class="language-javascript">const image = document.getElementById('myImage');
+const link = document.getElementById('myLink');
+
+// 画像の src 属性を変更
+image.setAttribute('src', 'image2.jpg');
+image.alt = "新しい画像"; // プロパティとして直接アクセスも可能
+
+// リンクの href 属性を変更
+link.setAttribute('href', 'new-page.html');
+link.textContent = "新しいページ"; // テキストも変えてみましょう
+
+console.log(image.getAttribute('src')); // "image2.jpg"</code></pre>
+                </li>
+                <li>
+                  <strong>スタイルの変更</strong><br />
+                  要素の<code>style</code>プロパティを通じて、CSSのスタイルを直接変更できます。プロパティ名は、CSSのハイフン区切り（例：<code>background-color</code>）ではなく、キャメルケース（例：<code>backgroundColor</code>）で指定します。
+                  <pre><code class="language-html">&lt;div id="box" style="width: 100px; height: 100px; background-color: blue;"&gt;&lt;/div&gt;</code></pre>
+                  <pre><code class="language-javascript">const boxElement = document.getElementById('box');
+
+// 背景色を変更
+boxElement.style.backgroundColor = 'red';
+
+// 幅と高さを変更
+boxElement.style.width = '150px';
+boxElement.style.height = '150px';
+
+// ボーダーを追加
+boxElement.style.border = '2px solid black';</code></pre>
+                  <p class="mt-2">
+                    ただし、JavaScriptでスタイルをたくさん変更するのは、管理が煩雑になりがちです。一般的には、あらかじめCSSで複数のスタイルセット（クラス）を定義しておき、JavaScriptでは要素のクラス名を変更する（<code>classList.add()</code>,
+                    <code>classList.remove()</code>,
+                    <code>classList.toggle()</code
+                    >などを使う）方が、よりクリーンで管理しやすい方法とされています。
+                  </p>
+                  <pre><code class="language-html">&lt;style&gt;
+  .active {
+    background-color: yellow;
+    font-weight: bold;
+  }
+&lt;/style&gt;
+&lt;p id="status"&gt;待機中&lt;/p&gt;</code></pre>
+                  <pre><code class="language-javascript">const statusElement = document.getElementById('status');
+// "active" クラスを追加
+statusElement.classList.add('active');
+// "active" クラスを削除
+// statusElement.classList.remove('active');
+// "active" クラスがあれば削除、なければ追加 (トグル)
+// statusElement.classList.toggle('active');</code></pre>
+                </li>
+              </ul>
+            </section>
+            <section
+              id="section3-3"
+              aria-labelledby="section3-3-title"
+              class="mt-6"
+            >
+              <h3 id="section3-3-title">
+                3.3.
+                要素の追加と削除：ウェブページに新しい部品を登場させたり、消したりする！
+              </h3>
+              <p>
+                DOMを使えば、既存の要素を変更するだけでなく、全く新しいHTML要素をJavaScriptで作成し、ページ内の好きな場所に追加したり、逆に既存の要素をページから削除したりすることも可能です。
+              </p>
+              <ul class="browser-default list-disc pl-5 space-y-3">
+                <li>
+                  <strong
+                    >要素の作成：
+                    <code>document.createElement('タグ名')</code></strong
+                  ><br />
+                  指定したタグ名の新しいHTML要素オブジェクトを作成します。この時点ではまだページには表示されず、メモリ上に存在するだけです。
+                  <pre><code class="language-javascript">// 新しい p 要素を作成
+const newParagraph = document.createElement('p');
+newParagraph.textContent = "これは新しく作られた段落です。";</code></pre>
+                </li>
+                <li>
+                  <strong>要素の追加</strong><br />
+                  作成した要素や既存の要素を、DOMツリー内の特定の場所に追加します。
+                  <ul class="browser-default list-circle pl-5 mt-1 space-y-1">
+                    <li>
+                      <code>親要素.appendChild(追加したい子要素)</code
+                      >：指定した親要素の<strong>最後の子要素として</strong>追加します。
+                    </li>
+                    <li>
+                      <code
+                        >親要素.insertBefore(追加したい新しい要素,
+                        参照する子要素)</code
+                      >：指定した親要素の中で、<strong>参照する子要素の直前に</strong>新しい要素を追加します。
+                    </li>
+                  </ul>
+                  <pre><code class="language-html">&lt;div id="container"&gt;
+    &lt;p&gt;既存の段落1&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                  <pre><code class="language-javascript">const container = document.getElementById('container');
+const firstParagraph = container.querySelector('p'); // 既存の段落1
+
+// 新しい段落を作成
+const newParagraph1 = document.createElement('p');
+newParagraph1.textContent = "appendChild で追加された段落。";
+
+// container の最後に newParagraph1 を追加
+container.appendChild(newParagraph1);
+
+// さらに別の新しい段落を作成
+const newParagraph2 = document.createElement('p');
+newParagraph2.textContent = "insertBefore で既存の段落1の前に追加された段落。";
+
+// container の firstParagraph の前に newParagraph2 を追加
+container.insertBefore(newParagraph2, firstParagraph);</code></pre>
+                </li>
+                <li>
+                  <strong
+                    >要素の削除：
+                    <code>親要素.removeChild(削除したい子要素)</code></strong
+                  ><br />
+                  指定した親要素から、特定の子要素を削除します。削除された要素はDOMツリーから取り除かれます。
+                  <pre><code class="language-html">&lt;ul id="myList"&gt;
+    &lt;li id="item1"&gt;アイテム1&lt;/li&gt;
+    &lt;li id="item2"&gt;アイテム2 (これを削除)&lt;/li&gt;
+    &lt;li id="item3"&gt;アイテム3&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+                  <pre><code class="language-javascript">const list = document.getElementById('myList');
+const itemToRemove = document.getElementById('item2');
+
+// item2 を myList から削除
+if (itemToRemove) { // 要素が存在するか確認
+    list.removeChild(itemToRemove);
+}</code></pre>
+                  <p class="mt-2">
+                    最近のブラウザでは、もっと簡単に
+                    <code>要素.remove()</code>
+                    というメソッドで自分自身を削除することも可能です。
+                  </p>
+                  <pre><code class="language-javascript">// const itemToRemove = document.getElementById('item2');
+// if (itemToRemove) {
+//     itemToRemove.remove(); // これだけで削除できる
+// }</code></pre>
+                </li>
+              </ul>
+              <p class="mt-3">
+                これらの操作を組み合わせることで、ユーザーのアクションに応じてリストに項目を追加したり、不要な情報を画面から消したりといった、動的なインターフェースを構築できます。
+              </p>
+            </section>
+            <section
+              id="section3-4"
+              aria-labelledby="section3-4-title"
+              class="mt-6"
+            >
+              <h3 id="section3-4-title">
+                3.4. イベント処理：ユーザーの操作に反応する！
+              </h3>
+              <p>
+                ウェブページは、ユーザーがクリックしたり、マウスを動かしたり、キーボードで入力したりといった様々な「イベント」が発生する場所です。DOMは、これらのイベントを捉え、それに応じて特定の処理（JavaScriptの関数）を実行させる仕組みを提供します。
+              </p>
+              <ul class="browser-default list-disc pl-5 space-y-3">
+                <li>
+                  <strong>イベントとは？</strong><br />
+                  ユーザーの操作（クリック、マウスオーバー、キー入力など）やブラウザの状態変化（ページの読み込み完了、ウィンドウサイズ変更など）を指します。
+                </li>
+                <li>
+                  <strong
+                    >イベントリスナーの追加：
+                    <code
+                      >要素.addEventListener('イベントの種類',
+                      実行したい関数)</code
+                    ></strong
+                  ><br />
+                  特定のHTML要素に対して、「この種類のイベントが起きたら、この関数を実行してください」とお願いするのがイベントリスナーです。
+                  <pre><code class="language-html">&lt;button id="myButton"&gt;クリックしてください&lt;/button&gt;
+&lt;div id="hoverArea" style="width:100px; height:50px; background:lightgray;"&gt;マウスを乗せて&lt;/div&gt;</code></pre>
+                  <pre><code class="language-javascript">const button = document.getElementById('myButton');
+const hoverDiv = document.getElementById('hoverArea');
+
+// ボタンがクリックされたときの処理
+button.addEventListener('click', function() {
+    alert('ボタンがクリックされました！'); // このalertは後でカスタムUIに置き換わります
+});
+
+// hoverDiv にマウスが乗ったときの処理
+hoverDiv.addEventListener('mouseover', function() {
+    hoverDiv.textContent = '乗った！';
+});
+
+// hoverDiv からマウスが離れたときの処理
+hoverDiv.addEventListener('mouseout', function() {
+    hoverDiv.textContent = 'マウスを乗せて';
+});</code></pre>
+                  <p class="mt-1">
+                    <code>addEventListener</code
+                    >の第二引数に指定する関数は、「コールバック関数」や「イベントハンドラ」と呼ばれます。
+                  </p>
+                </li>
+                <li>
+                  <strong>代表的なイベントの種類</strong>
+                  <ul
+                    class="browser-default list-disc pl-5 mt-1 space-y-1 text-sm"
+                  >
+                    <li><code>click</code>：要素がクリックされたとき。</li>
+                    <li>
+                      <code>mouseover</code
+                      >：マウスカーソルが要素の上に乗ったとき。
+                    </li>
+                    <li>
+                      <code>mouseout</code
+                      >：マウスカーソルが要素の上から離れたとき。
+                    </li>
+                    <li>
+                      <code>mousedown</code> /
+                      <code>mouseup</code
+                      >：マウスボタンが押された/離されたとき。
+                    </li>
+                    <li>
+                      <code>mousemove</code
+                      >：マウスカーソルが要素の上で移動したとき。
+                    </li>
+                    <li>
+                      <code>keydown</code> /
+                      <code>keyup</code
+                      >：キーボードのキーが押された/離されたとき。
+                    </li>
+                    <li>
+                      <code>focus</code> /
+                      <code>blur</code>：要素がフォーカスを得た/失ったとき。
+                    </li>
+                    <li>
+                      <code>change</code>：フォーム要素の値が変更されたとき。
+                    </li>
+                    <li><code>submit</code>：フォームが送信されたとき。</li>
+                    <li>
+                      <code>load</code
+                      >：ページやリソースの読み込みが完了したとき。
+                    </li>
+                    <li>
+                      <code>DOMContentLoaded</code
+                      >：HTMLの解析とDOMツリー構築が完了したとき。
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+              <p class="mt-3">
+                イベント処理は、ウェブページをインタラクティブにするための核心的な機能です。ユーザーの行動に応じてページが変化する、まさに「生きている」ウェブサイトを作るために不可欠です。
+              </p>
+            </section>
+          </section>
+
+          <section id="section4" aria-labelledby="section4-title" class="mt-10">
+            <h2 id="section4-title">
+              4. DOM操作の実際：簡単な例で動きを見てみよう！
+            </h2>
+            <p>
+              これまでに学んだことを使って、実際にDOMがどのように機能するのか、簡単な例で見ていきましょう。
+            </p>
+            <section
+              id="section4-1"
+              aria-labelledby="section4-1-title"
+              class="mt-6"
+            >
+              <h3 id="section4-1-title">
+                4.1. 例1：ボタンをクリックしたらテキストが変わる
+              </h3>
+              <p>
+                一番シンプルな例です。ボタンをクリックすると、特定の場所のテキストが変化します。
+              </p>
+              <p><strong>HTML:</strong></p>
+              <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;テキスト変更デモ&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;p id="messageArea"&gt;ここにメッセージが表示されます。&lt;/p&gt;
+    &lt;button id="changeButton"&gt;メッセージを変更&lt;/button&gt;
+
+    &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              <p><strong>JavaScript (script.js):</strong></p>
+              <pre><code class="language-javascript">// 1. 必要な要素を取得
+const messageElement = document.getElementById('messageArea');
+const changeBtn = document.getElementById('changeButton');
+
+// 2. ボタンがクリックされたときの処理を登録
+changeBtn.addEventListener('click', function() {
+    // 3. messageElement のテキスト内容を変更
+    messageElement.textContent = 'ボタンがクリックされました！やったね！';
+    messageElement.style.color = 'green'; // 色も変えてみましょう
+});</code></pre>
+              <p><strong>解説：</strong></p>
+              <ol class="browser-default list-decimal pl-5 space-y-1">
+                <li>
+                  まず、JavaScriptで操作したいHTML要素である「メッセージ表示エリア（<code>p</code>タグ）」と「変更ボタン（<code>button</code>タグ）」を、それぞれのIDを使って取得します。
+                </li>
+                <li>
+                  次に、ボタンに対して
+                  <code>addEventListener</code>
+                  を使い、「<code>click</code>（クリック）」イベントが発生したら実行する関数を登録します。
+                </li>
+                <li>
+                  ボタンがクリックされると、登録された関数が実行され、その中でメッセージ表示エリアの
+                  <code>textContent</code>
+                  プロパティを新しい文字列に書き換えています。さらに、文字色も緑に変えています。
+                </li>
+              </ol>
+              <p>
+                これで、ボタンを押すとメッセージが変わる、という基本的なDOM操作が実現できました。
+              </p>
+            </section>
+            <section
+              id="section4-2"
+              aria-labelledby="section4-2-title"
+              class="mt-6"
+            >
+              <h3 id="section4-2-title">
+                4.2. 例2：入力フォームの内容を取得して表示する
+              </h3>
+              <p>
+                ユーザーが入力したテキストを取得し、それをページに表示する例です。
+              </p>
+              <p><strong>HTML:</strong></p>
+              <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;入力内容表示デモ&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;input type="text" id="userInput" placeholder="何か入力してください"&gt;
+    &lt;button id="showButton"&gt;表示する&lt;/button&gt;
+    &lt;p&gt;あなたが入力したのは：&lt;span id="outputArea"&gt;&lt;/span&gt;&lt;/p&gt;
+
+    &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              <p><strong>JavaScript (script.js):</strong></p>
+              <pre><code class="language-javascript">// 1. 必要な要素を取得
+const inputField = document.getElementById('userInput');
+const showBtn = document.getElementById('showButton');
+const outputSpan = document.getElementById('outputArea');
+
+// 2. 表示ボタンがクリックされたときの処理を登録
+showBtn.addEventListener('click', function() {
+    // 3. 入力フィールドの値 (value) を取得
+    const inputValue = inputField.value;
+
+    // 4. 出力エリアに取得した値を設定
+    if (inputValue.trim() === '') { // 何も入力されていなければ
+        outputSpan.textContent = '何も入力されていませんよ。';
+        outputSpan.style.color = 'red';
+    } else {
+        outputSpan.textContent = inputValue;
+        outputSpan.style.color = 'blue';
+    }
+
+    // 5. 入力フィールドを空にする (おまけ)
+    // inputField.value = '';
+});</code></pre>
+              <p><strong>解説：</strong></p>
+              <ol class="browser-default list-decimal pl-5 space-y-1">
+                <li>
+                  入力フィールド (<code>input</code>タグ)、表示ボタン
+                  (<code>button</code>タグ)、出力エリア (<code>span</code>タグ)
+                  を取得します。
+                </li>
+                <li>表示ボタンにクリックイベントのリスナーを登録します。</li>
+                <li>
+                  ボタンがクリックされたら、入力フィールドの
+                  <code>value</code>
+                  プロパティからユーザーが入力したテキストを取得します。<code
+                    >value</code
+                  >
+                  プロパティは、フォーム要素の現在の値を保持しています。
+                </li>
+                <li>
+                  取得したテキストを、出力エリアの
+                  <code>textContent</code>
+                  に設定して表示します。ここでは、入力が空の場合の簡単なチェックも入れています。
+                </li>
+                <li>
+                  （コメントアウトされていますが）入力後にフィールドを空にすることもよく行われます。
+                </li>
+              </ol>
+            </section>
+            <section
+              id="section4-3"
+              aria-labelledby="section4-3-title"
+              class="mt-6"
+            >
+              <h3 id="section4-3-title">
+                4.3. 例3：リストに新しい項目を追加する
+              </h3>
+              <p>
+                ボタンを押すと、リストに新しい項目が動的に追加されていく例です。
+              </p>
+              <p><strong>HTML:</strong></p>
+              <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;リスト追加デモ&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;input type="text" id="newItemText" placeholder="新しいアイテム名"&gt;
+    &lt;button id="addButton"&gt;リストに追加&lt;/button&gt;
+    &lt;ul id="myList"&gt;
+        &lt;li&gt;最初のアイテム&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              <p><strong>JavaScript (script.js):</strong></p>
+              <pre><code class="language-javascript">// 1. 必要な要素を取得
+const newItemInput = document.getElementById('newItemText');
+const addBtn = document.getElementById('addButton');
+const itemList = document.getElementById('myList');
+// let itemCount = 1; // アイテム番号を管理するカウンター (今回は未使用)
+
+// 2. 追加ボタンがクリックされたときの処理を登録
+addBtn.addEventListener('click', function() {
+    const itemText = newItemInput.value.trim(); // 入力値を取得し、前後の空白を除去
+
+    if (itemText === '') {
+        alert('アイテム名を入力してください。'); // このalertは後でカスタムUIに置き換わります
+        return; // 何も入力されていなければ処理を中断
+    }
+
+    // 3. 新しい li 要素を作成
+    const newListItem = document.createElement('li');
+
+    // 4. 作成した li 要素にテキスト内容を設定
+    newListItem.textContent = itemText; // 入力されたテキストを使用
+
+    // 5. ul 要素 (itemList) の子要素として、新しい li 要素を追加
+    itemList.appendChild(newListItem);
+
+    // 6. 入力フィールドをクリア
+    newItemInput.value = '';
+    newItemInput.focus(); // 入力フィールドにフォーカスを戻す (便利機能)
+});</code></pre>
+              <p><strong>解説：</strong></p>
+              <ol class="browser-default list-decimal pl-5 space-y-1">
+                <li>
+                  入力フィールド、追加ボタン、リスト表示用の
+                  <code>ul</code> 要素を取得します。
+                </li>
+                <li>追加ボタンにクリックイベントのリスナーを登録します。</li>
+                <li>
+                  ボタンがクリックされたら、まず入力フィールドから新しいアイテムのテキストを取得します。空の場合は警告を出して処理を止めます。
+                </li>
+                <li>
+                  <code>document.createElement('li')</code> を使って、新しい
+                  <code>&lt;li&gt;</code>
+                  要素（リストの項目）をプログラムで作成します。
+                </li>
+                <li>
+                  作成した <code>&lt;li&gt;</code> 要素の
+                  <code>textContent</code> に、入力されたテキストを設定します。
+                </li>
+                <li>
+                  最後に、<code>itemList.appendChild(newListItem)</code>
+                  を使って、作成した新しい <code>&lt;li&gt;</code> 要素を
+                  <code>&lt;ul&gt;</code>
+                  タグ（<code>itemList</code>）の最後の子要素として追加します。これにより、画面上のリストに新しい項目が表示されます。
+                </li>
+                <li>
+                  入力フィールドを空にし、再度フォーカスを当てることで、連続してアイテムを追加しやすくしています。
+                </li>
+              </ol>
+              <p class="mt-3">
+                これらの例は非常に基本的なものですが、DOM操作の強力さの一端を感じていただけたのではないでしょうか。これらの知識を組み合わせることで、もっと複雑でインタラクティブなウェブアプリケーションを構築していくことが可能になります。
+              </p>
+            </section>
+          </section>
+
+          <section id="section5" aria-labelledby="section5-title" class="mt-10">
+            <h2 id="section5-title">
+              5. DOMとJavaScriptフレームワーク/ライブラリ
+              ～もっと楽に、もっと賢く～
+            </h2>
+            <p>
+              これまで見てきたように、素のJavaScript（Vanilla
+              JSとも呼ばれます）でDOMを直接操作することは、ウェブページに動きを与える基本的な方法です。しかし、ウェブアプリケーションが複雑化し、扱うデータやUIの要素が増えてくると、いくつかの課題も見えてきます。
+            </p>
+            <ul class="browser-default list-disc pl-5 space-y-1">
+              <li>
+                <strong>コードの煩雑化</strong
+                >：多くの要素を取得し、変更し、イベントを設定していくと、コードが長くなり、見通しが悪くなりがちです。
+              </li>
+              <li>
+                <strong>パフォーマンスの問題</strong
+                >：DOM操作は、ブラウザにとって比較的コストの高い処理です。頻繁にDOMを書き換えると、ページの再描画（リフローやリペイント）が何度も発生し、動作が重くなることがあります。
+              </li>
+              <li>
+                <strong>状態管理の難しさ</strong
+                >：ページの状態（どのデータがどう表示されているかなど）をJavaScriptの変数だけで管理し、それを正確にDOMに反映させ続けるのは、規模が大きくなると非常に難しくなります。
+              </li>
+            </ul>
+            <p>
+              こうした課題を解決し、より効率的で洗練された開発を可能にするために、様々なJavaScriptの<strong>フレームワーク</strong>や<strong>ライブラリ</strong>が登場しました。
+            </p>
+            <section
+              id="section5-1"
+              aria-labelledby="section5-1-title"
+              class="mt-6"
+            >
+              <h3 id="section5-1-title">5.1. かつての救世主：jQuery</h3>
+              <p>
+                一昔前、ブラウザ間のJavaScriptの挙動の違い（特に古いInternet
+                Explorerなど）を吸収し、より短い記述でDOM操作やイベント処理、アニメーション、Ajax通信（非同期通信）などを行えるようにしたライブラリとして、<strong
+                  >jQuery (ジェイクエリー)</strong
+                >
+                が絶大な人気を誇りました。
+              </p>
+              <p>
+                例えば、IDが
+                <code>myElement</code> の要素のテキストを変える場合：
+              </p>
+              <ul class="browser-default list-disc pl-5 space-y-1 mt-2">
+                <li>
+                  <strong>素のJavaScript:</strong>
+                  <code
+                    >document.getElementById('myElement').textContent =
+                    '新しいテキスト';</code
+                  >
+                </li>
+                <li>
+                  <strong>jQuery:</strong>
+                  <code>$('#myElement').text('新しいテキスト');</code>
+                </li>
+              </ul>
+              <p class="mt-2">
+                このように、jQueryは
+                <code>$</code>
+                という短い記号と連鎖的なメソッド呼び出し（メソッドチェーン）によって、記述量を大幅に減らし、開発効率を向上させました。また、ブラウザ間の差異を
+                jQuery
+                内部で吸収してくれるため、開発者はその違いをあまり意識せずに済むという大きなメリットがありました。
+              </p>
+              <p>
+                しかし、現代のJavaScript (ES6以降)
+                は標準で多くの便利な機能を備えるようになり、ブラウザ間の互換性も向上したため、単純なDOM操作のためだけにjQueryを導入する必要性は薄れてきました。それでも、既存の多くのウェブサイトで使われており、その功績は非常に大きいです。
+              </p>
+            </section>
+            <section
+              id="section5-2"
+              aria-labelledby="section5-2-title"
+              class="mt-6"
+            >
+              <h3 id="section5-2-title">
+                5.2. 現代の主流：React, Vue, Angular と「仮想DOM」
+              </h3>
+              <p>
+                現代のフロントエンド開発では、<strong>React (リアクト)</strong
+                >、<strong>Vue.js (ビュージェイエス)</strong>、<strong
+                  >Angular (アンギュラー)</strong
+                >
+                といった高機能なJavaScriptフレームワーク/ライブラリが広く使われています。これらのツールは、DOM操作をより抽象的なレベルで扱えるようにし、大規模で複雑なアプリケーションの開発をサポートします。
+              </p>
+              <p>
+                これらの現代的なフレームワークの多くが採用している重要な概念の一つに、<strong
+                  >仮想DOM (Virtual DOM)</strong
+                >
+                があります。
+              </p>
+              <p><strong>仮想DOMとは？</strong></p>
+              <p>
+                仮想DOMは、実際のDOM（ブラウザが持つDOM）の「コピー」のようなものを、JavaScriptのオブジェクトとしてメモリ上に保持する仕組みです。
+              </p>
+              <p><strong>なぜ仮想DOMを使うのか？</strong></p>
+              <ol class="browser-default list-decimal pl-5 space-y-2 mt-2">
+                <li>
+                  <strong>パフォーマンスの最適化</strong>：<br />
+                  アプリケーションの状態が変化したとき（例えば、ユーザーが何かを入力したり、サーバーから新しいデータが届いたりしたとき）、フレームワークはまず<strong>仮想DOM上で変更を計算します</strong>。<br />
+                  次に、変更後の仮想DOMと変更前の仮想DOMを比較し、<strong>実際に変更があった差分だけを特定します</strong>。<br />
+                  そして、その<strong>差分だけを実際のDOMにまとめて適用します</strong>。<br />
+                  これにより、実際のDOMへのアクセス回数を最小限に抑えることができます。前述の通り、実際のDOM操作はコストが高いため、この仕組みによって不要な再描画を防ぎ、アプリケーションのパフォーマンスを向上させることができるのです。「まとめて変更を適用する」というのがポイントです。
+                </li>
+                <li>
+                  <strong>宣言的なUI構築</strong>：<br />
+                  ReactやVueのようなフレームワークでは、開発者は「最終的にUIがどのような状態であるべきか」を宣言的に記述します。例えば、「このデータがあれば、このようなリストを表示する」といった具合です。<br />
+                  データが変更されると、フレームワークが自動的に仮想DOMを更新し、差分を計算し、実際のDOMに必要な変更だけを効率的に適用してくれます。開発者は、DOMを一つ一つ手動で操作する命令的なコードを書く必要が大幅に減り、UIの見た目とロジックに集中できます。
+                </li>
+              </ol>
+              <p class="mt-3">
+                <strong>フレームワークはDOM操作をラップする</strong>
+              </p>
+              <p>
+                これらのフレームワークは、結局のところ内部でDOMを操作しています。しかし、その複雑な部分をフレームワークが肩代わりしてくれるため、開発者はより宣言的（「こうなってほしい」と書くスタイル）にUIを構築でき、コンポーネント（再利用可能なUI部品）ベースでの開発や、アプリケーションの状態管理などが容易になります。
+              </p>
+              <p>
+                つまり、現代のフレームワークは、私たちが直接DOMを細かく触る代わりに、もっと大きな視点で「アプリケーションがどうあるべきか」を記述し、その実現をフレームワークに任せる、というスタイルを可能にしているのです。
+              </p>
+              <p>
+                しかし、これらのフレームワークを効果的に使うためにも、その根底にあるDOMの仕組みを理解していることは非常に重要です。問題が発生したときのデバッグや、パフォーマンスチューニング、あるいはフレームワークが提供しない低レベルな操作が必要になった場合に、DOMの知識が役立ちます。
+              </p>
+            </section>
+          </section>
+
+          <section id="section6" aria-labelledby="section6-title" class="mt-10">
+            <h2 id="section6-title">
+              6. DOMを扱う上での注意点とベストプラクティス
+              ～賢く使ってトラブル回避～
+            </h2>
+            <p>
+              DOM操作は強力ですが、使い方によってはパフォーマンスの低下やセキュリティの問題を引き起こすこともあります。ここでは、DOMを扱う際の注意点と、より良いコードを書くためのヒント（ベストプラクティス）をご紹介します。
+            </p>
+            <section
+              id="section6-1"
+              aria-labelledby="section6-1-title"
+              class="mt-6"
+            >
+              <h3 id="section6-1-title">
+                6.1. パフォーマンス：サクサク動くページのために
+              </h3>
+              <ul class="browser-default list-disc pl-5 space-y-3">
+                <li>
+                  <strong>DOMアクセスは「重い」と心得る</strong><br />
+                  JavaScriptのコード実行そのものに比べて、DOMにアクセスして情報を読み取ったり、変更したりする操作は、ブラウザにとって比較的時間がかかる処理です。特に、DOMの構造を変更すると、ブラウザはページのレイアウトを再計算（<strong>リフロー</strong>）し、再描画（<strong>リペイント</strong>）する必要が生じることがあり、これが頻繁に起こるとページの動作がカクカクしたり、反応が鈍くなったりします。
+                </li>
+                <li>
+                  <strong>DOM操作はまとめて行う</strong><br />
+                  ループ処理の中で何度もDOM要素のスタイルを変更したり、要素を追加・削除したりするのは避けましょう。変更を一度メモリ上で行い、最後にまとめてDOMに反映させるのが理想です。
+                  <ul class="browser-default list-circle pl-5 mt-1 space-y-1">
+                    <li>
+                      <strong
+                        >DocumentFragment (ドキュメントフラグメント)</strong
+                      >：<br />
+                      これは「メモリ上の軽量なDOMツリー」のようなもので、実際のページには表示されません。複数の要素を一度に作成・追加したい場合、まずDocumentFragmentにそれらの要素を追加し、最後にそのDocumentFragment自体を実際のDOMに追加します。こうすることで、実際のDOMへの追加操作が一度で済み、リフローやリペイントの回数を減らせます。
+                      <pre><code class="language-javascript">const list = document.getElementById('myList');
+const fragment = document.createDocumentFragment();
+const fruits = ['リンゴ', 'バナナ', 'オレンジ'];
+
+fruits.forEach(fruitText =&gt; {
+    const li = document.createElement('li');
+    li.textContent = fruitText;
+    fragment.appendChild(li); // まずフラグメントに追加
+});
+
+list.appendChild(fragment); // 最後にまとめて実際のDOMに追加</code></pre>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>要素の取得を効率的に</strong><br />
+                  何度も同じ要素を取得するようなコードは避け、一度取得した要素は変数に格納して再利用しましょう。
+                  <pre><code class="language-javascript">// 悪い例：ループ内で毎回要素を取得
+for (let i = 0; i &lt; 100; i++) {
+    document.getElementById('myElement').textContent = `Count: ${i}`;
+}
+
+// 良い例：一度取得して再利用
+const myElement = document.getElementById('myElement');
+for (let i = 0; i &lt; 100; i++) {
+    myElement.textContent = `Count: ${i}`;
+}</code></pre>
+                </li>
+                <li>
+                  <strong>イベント移譲 (Event Delegation)</strong><br />
+                  多数の要素（例えば、リストの各項目）に同じようなイベントリスナーを設定したい場合、個々の要素すべてにリスナーを登録するのではなく、それらの親要素に一つだけリスナーを登録し、イベントが発生した際に実際にどの個々の子要素で発生したのかを判別するテクニックです。<br />
+                  これにより、リスナーの登録数を減らし、メモリ消費を抑え、動的に追加された要素にも自動的にイベント処理が適用されるというメリットがあります。
+                  <pre><code class="language-html">&lt;ul id="parentList"&gt;
+    &lt;li&gt;アイテム 1&lt;/li&gt;
+    &lt;li&gt;アイテム 2&lt;/li&gt;
+    &lt;li&gt;アイテム 3&lt;/li&gt;
+    &lt;!-- 動的にアイテムが追加されてもOK --&gt;
+&lt;/ul&gt;</code></pre>
+                  <pre><code class="language-javascript">const parentList = document.getElementById('parentList');
+
+parentList.addEventListener('click', function(event) {
+    // event.target は実際にクリックされた要素を指す
+    if (event.target && event.target.nodeName === 'LI') {
+        // クリックされたのが LI 要素の場合のみ処理
+        console.log(event.target.textContent + ' がクリックされました！');
+    }
+});</code></pre>
+                  <p class="mt-1">
+                    <code>event.target</code> がクリックされた要素、<code
+                      >event.currentTarget</code
+                    >
+                    がイベントリスナーが設定された要素（この場合は
+                    <code>parentList</code>）を指します。
+                  </p>
+                </li>
+              </ul>
+            </section>
+            <section
+              id="section6-2"
+              aria-labelledby="section6-2-title"
+              class="mt-6"
+            >
+              <h3 id="section6-2-title">
+                6.2. セキュリティ：安全なウェブページのために
+              </h3>
+              <ul class="browser-default list-disc pl-5 space-y-3">
+                <li>
+                  <strong><code>innerHTML</code> の危険性（XSS対策）</strong
+                  ><br />
+                  <code>innerHTML</code>
+                  プロパティを使ってHTMLコンテンツを要素に挿入する場合、そのコンテンツに悪意のあるスクリプト（例：<code>&lt;script&gt;alert('ハッキング！')&lt;/script&gt;</code>のようなもの）が含まれていると、それが実行されてしまう可能性があります。これは<strong
+                    >クロスサイトスクリプティング (XSS)</strong
+                  >
+                  と呼ばれる代表的なセキュリティ脆弱性の一つです。<br />
+                  ユーザーが入力した内容や、信頼できない外部ソースから取得したデータを
+                  <code>innerHTML</code> で直接表示するのは非常に危険です。
+                </li>
+                <li>
+                  <strong
+                    ><code>textContent</code> や
+                    <code>createElement</code> を使う</strong
+                  ><br />
+                  テキストだけを表示したい場合は、必ず
+                  <code>textContent</code> を使いましょう。<code
+                    >textContent</code
+                  >
+                  はHTMLタグを単なる文字列として扱うため、スクリプトが実行される心配がありません。<br />
+                  新しいHTML要素を動的に作りたい場合は、<code
+                    >document.createElement()</code
+                  >
+                  を使い、必要な属性やテキスト内容を
+                  <code>setAttribute()</code> や
+                  <code>textContent</code> で設定していく方が安全です。
+                  <pre><code class="language-javascript">const userInput = "&lt;script&gt;alert('危険！');&lt;/script&gt;"; // ユーザーからの入力（かもしれない）
+
+// 悪い例：innerHTML を使うとスクリプトが実行される可能性がある
+// unsafeDiv.innerHTML = userInput;
+
+// 良い例：textContent を使うと安全
+const safeDiv = document.getElementById('safeDisplay');
+safeDiv.textContent = userInput; // "&lt;script&gt;alert('危険！');&lt;/script&gt;" という文字列がそのまま表示される
+
+// 要素を安全に作る例
+const newDiv = document.createElement('div');
+const newText = document.createTextNode("安全なテキスト"); // テキストノードを作る方法も
+newDiv.appendChild(newText);
+document.body.appendChild(newDiv);</code></pre>
+                </li>
+              </ul>
+            </section>
+            <section
+              id="section6-3"
+              aria-labelledby="section6-3-title"
+              class="mt-6"
+            >
+              <h3 id="section6-3-title">
+                6.3. 可読性と保守性：わかりやすいコードのために
+              </h3>
+              <ul class="browser-default list-disc pl-5 space-y-3">
+                <li>
+                  <strong>意味のあるIDやクラス名</strong><br />
+                  <code>div1</code>,
+                  <code>button2</code>
+                  のような名前ではなく、その要素の役割がわかるようなID名（例：<code>userProfileCard</code>,
+                  <code>submitFormButton</code
+                  >）やクラス名（例：<code>error-message</code>,
+                  <code>highlighted-item</code
+                  >）を付けましょう。これにより、後からコードを読んだときや、他の人がコードを読むときに理解しやすくなります。
+                </li>
+                <li>
+                  <strong>適切なコメント</strong><br />
+                  複雑な処理や、なぜそのようなコードにしたのか意図がわかりにくい部分には、コメントを残しましょう。ただし、コードを見れば明らかなことまでコメントする必要はありません。
+                </li>
+                <li>
+                  <strong>処理のモジュール化（関数化）</strong><br />
+                  同じようなDOM操作を複数の場所で行う場合は、その処理を関数としてまとめておくと、コードの重複を避けられ、再利用しやすくなります。また、関数に適切な名前をつけることで、その処理内容が明確になります。
+                  <pre><code class="language-javascript">// 悪い例：同じような処理が散らばっている
+// const user1Name = document.getElementById('user1-name');
+// user1Name.textContent = 'Alice';
+// user1Name.style.color = 'blue';
+
+// const user2Name = document.getElementById('user2-name');
+// user2Name.textContent = 'Bob';
+// user2Name.style.color = 'blue';
+
+// 良い例：関数にまとめる
+function updateUserName(elementId, name) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = name;
+        element.style.color = 'blue';
+    }
+}
+
+updateUserName('user1-name', 'Alice');
+updateUserName('user2-name', 'Bob');</code></pre>
+                </li>
+              </ul>
+              <p class="mt-3">
+                これらの点に注意することで、より安全で、効率的で、メンテナンスしやすいDOM操作のコードを書くことができます。
+              </p>
+            </section>
+          </section>
+
+          <section id="section7" aria-labelledby="section7-title" class="mt-10">
+            <h2 id="section7-title">
+              7. DOMの未来と発展 ～さらに進化するウェブ表現～
+            </h2>
+            <p>
+              DOMはウェブの基本的な技術であり続けていますが、その周辺技術は進化を続けています。より高度なウェブアプリケーションを構築するための新しい仕組みが登場しています。
+            </p>
+            <section
+              id="section7-1"
+              aria-labelledby="section7-1-title"
+              class="mt-6"
+            >
+              <h3 id="section7-1-title">
+                7.1. Web Components (ウェブコンポーネンツ) と Shadow DOM
+                (シャドウドム)
+              </h3>
+              <ul class="browser-default list-disc pl-5 space-y-2">
+                <li>
+                  <strong>Web Components</strong>
+                  は、再利用可能なカスタムHTML要素を作成するための一連のウェブ技術です。これにより、例えば
+                  <code>&lt;my-custom-button&gt;</code>
+                  のような独自のタグを作り、その内部構造や動作をカプセル化（隠蔽）できます。
+                </li>
+                <li>
+                  <strong>Shadow DOM</strong> は、Web
+                  Componentsの核心技術の一つで、特定のDOMツリーの範囲を「影の領域」として分離します。この影の領域内のスタイルやスクリプトは、外部のDOM（メインのDOM）から隔離され、逆に外部のスタイルやスクリプトの影響も受けにくくなります。<br />
+                  これにより、大きなウェブページの中で、部品ごとに独立したスタイルや挙動を持たせることが容易になり、意図しないスタイルの衝突などを防ぐことができます。まるで、部品ごとに小さな「結界」を張るようなイメージです。
+                </li>
+              </ul>
+              <p class="mt-3">
+                例えば、あるウェブサイトで使われている
+                <code>&lt;video&gt;</code>
+                タグの再生ボタンやスライダーなどのコントロール部品は、多くの場合Shadow
+                DOMを使って実装されています。開発者ツールで覗いてみると、<code
+                  >#shadow-root</code
+                >
+                という表示が見つかるかもしれません。
+              </p>
+              <p>
+                これらの技術は、よりモジュール化され、再利用性の高いUIコンポーネントの作成を促進し、大規模なウェブアプリケーションの開発を助けます。
+              </p>
+            </section>
+            <section
+              id="section7-2"
+              aria-labelledby="section7-2-title"
+              class="mt-6"
+            >
+              <h3 id="section7-2-title">7.2. 新しいAPIの登場や標準化</h3>
+              <p>
+                ウェブ標準は常に進化しており、DOM操作をより便利にしたり、新しい機能を実現したりするためのAPIが提案され、標準化されていきます。例えば、アニメーションをよりスムーズかつ効率的に行うためのWeb
+                Animations APIや、要素の表示/非表示状態を監視するIntersection
+                Observer APIなど、様々なAPIが登場しています。
+              </p>
+              <p>
+                これらの新しいAPIをキャッチアップしていくことで、より洗練されたユーザー体験を提供できる可能性があります。
+              </p>
+              <p>
+                DOMそのものの基本的な考え方（ツリー構造、オブジェクトモデル）は変わりませんが、それを操作したり、拡張したりする方法は、ウェブ技術の進化とともに豊かになっているのです。
+              </p>
+            </section>
+          </section>
+
+          <section id="section8" aria-labelledby="section8-title" class="mt-10">
+            <h2 id="section8-title">
+              8. DOMを学ぶための次のステップ ～実践こそが最高の師～
+            </h2>
+            <p>
+              この記事でDOMの基本的な概念や操作方法について幅広く触れてきましたが、DOMを本当に理解し、使いこなせるようになるためには、実際に手を動かしてコードを書いてみることが不可欠です。
+            </p>
+            <section
+              id="section8-1"
+              aria-labelledby="section8-1-title"
+              class="mt-6"
+            >
+              <h3 id="section8-1-title">8.1. おすすめの学習リソース</h3>
+              <ul class="browser-default list-disc pl-5 space-y-2">
+                <li>
+                  <strong>MDN Web Docs (Mozilla Developer Network)</strong
+                  ><br />
+                  ウェブ技術に関する最も信頼性が高く、詳細なドキュメントの一つです。DOMに関する各メソッドやプロパティの解説、使用例などが豊富に掲載されています。初心者から上級者まで、あらゆるレベルの開発者にとって必携のリソースです。<br />
+                  特に「Document Object Model (DOM)」のセクションは必読です。
+                </li>
+                <li>
+                  <strong
+                    >オンラインのインタラクティブなコーディング学習サイト</strong
+                  ><br />
+                  freeCodeCamp, Codecademy, Progate
+                  (日本語)など、実際にブラウザ上でコードを書きながら学べるサイトがたくさんあります。DOM操作の基礎を練習問題を通して学べるコースを探してみましょう。
+                </li>
+                <li>
+                  <strong>JavaScriptの入門書やチュートリアル</strong><br />
+                  多くのJavaScriptの入門書やオンラインチュートリアルでは、DOM操作が重要なトピックとして扱われています。自分のレベルに合ったものを選んで、体系的に学んでみるのも良いでしょう。
+                </li>
+              </ul>
+            </section>
+            <section
+              id="section8-2"
+              aria-labelledby="section8-2-title"
+              class="mt-6"
+            >
+              <h3 id="section8-2-title">
+                8.2. 実際に手を動かして学ぶことの重要性
+              </h3>
+              <ul class="browser-default list-disc pl-5 space-y-2">
+                <li>
+                  <strong>簡単なウェブページを作ってみる</strong><br />
+                  学んだことを使って、自分だけの簡単なウェブページを作ってみましょう。例えば、「ボタンを押すと画像が変わる」「ToDoリストを作る」「簡単な計算機を作る」など、小さなプロジェクトから始めるのがおすすめです。
+                </li>
+                <li>
+                  <strong>既存のウェブサイトを分析してみる</strong><br />
+                  ブラウザの開発者ツール（多くのブラウザでF12キーで開けます）を使って、普段見ているウェブサイトのHTML構造やDOMツリーがどうなっているか観察してみましょう。「Elements」タブ（または「インスペクター」タブ）でDOMツリーを見たり、要素を選択してそのスタイルを確認したりできます。「Console」タブでJavaScriptを直接実行してDOM操作を試してみることも可能です。
+                </li>
+                <li>
+                  <strong>小さな課題に挑戦する</strong><br />
+                  「このテキストの色を変えたい」「ここに新しい要素を追加したい」といった具体的な小さな課題を設定し、それを解決するためのコードを書いてみましょう。試行錯誤する中で、理解が深まります。
+                </li>
+              </ul>
+              <p class="mt-3">
+                DOMの学習は、最初は少し抽象的に感じるかもしれませんが、実際にコードを書いてウェブページが自分の指示通りに変化するのを見ると、その面白さと強力さを実感できるはずです。焦らず、一つ一つの概念を自分のものにしていきましょう。
+              </p>
+            </section>
+          </section>
+
+          <section id="section9" aria-labelledby="section9-title" class="mt-10">
+            <h2 id="section9-title">
+              9. おわりに：DOMはウェブ開発の「共通言語」
+            </h2>
+            <p>
+              ここまで、DOMとは何か、何ができるのか、そしてどのように扱えばよいのか、という点について、できる限り丁寧にご説明してきました。
+            </p>
+            <p>
+              DOMは、HTMLという静的な文書に命を吹き込み、JavaScriptという魔法使いがウェブページを自由自在に操るための、まさに「縁の下の力持ち」であり、ウェブ開発における「共通言語」の一つと言えるでしょう。
+            </p>
+            <p>
+              あなたがウェブデザイナーであれ、フロントエンド開発者であれ、あるいはバックエンド開発者であっても、ウェブがどのように動的に変化するのかを理解する上で、DOMの知識は必ずあなたの助けとなります。特に、JavaScriptを使ってインタラクティブなウェブサイトやアプリケーションを作りたいと考えているなら、DOMの理解は避けては通れない道です。
+            </p>
+            <p>
+              現代のフレームワークはDOM操作の複雑さを隠蔽してくれることが多いですが、その背後で何が起こっているのかを知っていることは、より深い理解と問題解決能力につながります。
+            </p>
+            <p>
+              この記事が、あなたのDOMへの理解を深める一助となり、これからのウェブ制作や学習へのモチベーションを高めるきっかけとなれば、これほど嬉しいことはありません。
+            </p>
+            <p>
+              さあ、DOMという強力な道具を手に入れたあなたなら、きっと素晴らしいウェブ体験を創造できるはずです。頑張ってください！
+            </p>
+          </section>
+        </article>
+      </div>
+    </div>
+
+    <footer class="bg-gray-700 text-white py-10 mt-16">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-sm">&copy; 2024 DOM解説記事. All rights reserved.</p>
+        <p class="text-xs text-gray-400 mt-1">
+          この記事は学習目的で作成されました。
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      // 目次トグル機能
+      const tocToggleButton = document.getElementById("toc-toggle-button");
+      const tocContainer = document.getElementById("toc-container");
+
+      if (tocToggleButton && tocContainer) {
+        // 初期状態でlg未満なら目次を隠す
+        if (window.innerWidth < 1024) {
+          tocContainer.classList.add("hidden");
+        } else {
+          tocContainer.classList.remove("hidden"); // PCでは表示
+        }
+
+        tocToggleButton.addEventListener("click", () => {
+          tocContainer.classList.toggle("hidden");
+        });
+
+        // ウィンドウリサイズ時の処理
+        window.addEventListener("resize", () => {
+          if (window.innerWidth < 1024) {
+            // スマホサイズで、もしボタンで開かれていなければ隠す
+            if (
+              !tocContainer.classList.contains("hidden") &&
+              tocToggleButton.offsetParent === null
+            ) {
+              // この条件は複雑なので、シンプルにトグル状態を維持する
+            }
+          } else {
+            tocContainer.classList.remove("hidden"); // PCサイズでは常に表示
+          }
+        });
+      }
+
+      // スクロールスパイ (簡易版、オプション)
+      const tocLinks = document.querySelectorAll("#toc a");
+      const articleSections = document.querySelectorAll("article section[id]");
+      let scrollTimeout;
+
+      function onOptimizedScroll() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(function () {
+          let currentSectionId = "";
+          const headerOffset = 100; // ヘッダーや余白の高さを考慮
+
+          articleSections.forEach((section) => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - headerOffset) {
+              currentSectionId = section.getAttribute("id");
+            }
+          });
+
+          tocLinks.forEach((link) => {
+            link.classList.remove("active");
+            const href = link.getAttribute("href");
+            if (href === `#${currentSectionId}`) {
+              link.classList.add("active");
+            }
+          });
+        }, 50); // 50msのディレイで発火を間引く
+      }
+      // window.addEventListener('scroll', onOptimizedScroll);
+      // document.addEventListener('DOMContentLoaded', onOptimizedScroll); // 初期表示
+
+      // alert()のカスタムUI置き換え
+      window.alert = function (message) {
+        // 既存のカスタムアラートがあれば削除
+        const existingAlert = document.getElementById("custom-alert-box");
+        if (existingAlert) {
+          existingAlert.remove();
+        }
+
+        const alertBox = document.createElement("div");
+        alertBox.id = "custom-alert-box";
+        alertBox.setAttribute("role", "alert");
+        alertBox.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #ffebee; /* Material Design Error Color Light */
+                color: #c62828; /* Material Design Error Color Dark */
+                padding: 1rem 1.5rem;
+                border: 1px solid #ef9a9a;
+                border-radius: 0.375rem; /* rounded-md */
+                z-index: 10000;
+                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+                display: flex;
+                align-items: center;
+                max-width: 90%;
+            `;
+
+        const messageSpan = document.createElement("span");
+        messageSpan.textContent = message;
+        messageSpan.style.flexGrow = "1";
+
+        const closeButton = document.createElement("button");
+        closeButton.innerHTML = "&times;"; // 乗算記号 (バツ印)
+        closeButton.setAttribute("aria-label", "閉じる");
+        closeButton.style.cssText = `
+                margin-left: 1.5rem;
+                padding: 0.25rem 0.5rem;
+                border: none;
+                background-color: transparent;
+                color: #c62828;
+                font-size: 1.5rem;
+                font-weight: bold;
+                line-height: 1;
+                cursor: pointer;
+                opacity: 0.7;
+            `;
+        closeButton.onmouseover = () => (closeButton.style.opacity = "1");
+        closeButton.onmouseout = () => (closeButton.style.opacity = "0.7");
+
+        closeButton.onclick = function () {
+          alertBox.remove();
+        };
+
+        alertBox.appendChild(messageSpan);
+        alertBox.appendChild(closeButton);
+        document.body.appendChild(alertBox);
+
+        // 5秒後に自動で消えるタイマー（オプション）
+        // setTimeout(() => {
+        //     if (document.body.contains(alertBox)) {
+        //         alertBox.remove();
+        //     }
+        // }, 5000);
+      };
+    </script>
+  </body>
+</html>

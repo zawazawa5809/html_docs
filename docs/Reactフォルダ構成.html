@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブガイド: Reactフォルダ構成</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Tailwind Stone & Teal) -->
+    <!-- Application Structure Plan: アプリケーションは、左側に固定ナビゲーション（ファイルツリー）、右側にメインコンテンツエリアを持つ2カラムレイアウトを採用します。この構造により、ユーザーはファイルツリーをクリックして特定の項目に直接ジャンプする「非線形な探索」と、従来通りにスクロールして読み進める「線形な学習」の両方が可能です。ファイルツリー自体が視覚的な目次として機能し、構造と説明を直感的に結びつけることで、特に初心者にとっての理解を助けます。このインタラクティブな探索方法は、静的なドキュメントを読むよりも能動的な学習を促し、知識の定着を高めることを目的としています。 -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: 全体のフォルダ構成 -> Goal: Organize/Inform -> Viz/Presentation Method: インタラクティブなHTMLファイルツリー -> Interaction: クリックで該当セクションへスクロール＆ハイライト -> Justification: プロジェクトの全体像を視覚的に示し、各要素へのアクセスポイントとして機能させるため。
+        - Report Info: 各フォルダ/ファイルの詳細説明 -> Goal: Inform -> Viz/Presentation Method: 整形されたテキストブロック -> Interaction: なし -> Justification: 情報を明確かつ簡潔に伝えるための標準的な方法。
+        - Report Info: Pythonとの対比 -> Goal: Compare -> Viz/Presentation Method: アイコン付きのテーマ別カード -> Interaction: なし -> Justification: 重要なアナロジーを視覚的に際立たせ、Python開発者の既存知識との関連付けを容易にするため。
+        - Report Info: コード例 -> Goal: Inform -> Viz/Presentation Method: スタイル付きのコードブロック -> Interaction: なし -> Justification: 具体的なコードの雰囲気を伝え、理解を深めるため。
+        - Report Info: 定量データ -> Goal: N/A -> Viz/Presentation Method: チャートは不使用 -> Interaction: N/A -> Justification: ソースレポートは定性的・説明的な内容であり、ユーザーの理解を助ける有意義な量的データが存在しないため。チャートを無理に導入することは、むしろ情報の明確性を損なうと判断しました。
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .file-tree-nav .active {
+            background-color: #ccfbf1; /* teal-100 */
+            color: #0d9488; /* teal-600 */
+            font-weight: 500;
+        }
+        .file-tree-nav li span:hover {
+            background-color: #f0fdfa; /* teal-50 */
+        }
+        .content-section {
+            border-left: 2px solid #e7e5e4; /* stone-200 */
+        }
+        .python-analogy {
+            background-color: #f0fdfa; /* teal-50 */
+            border-left: 4px solid #14b8a6; /* teal-500 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="max-w-7xl mx-auto">
+        <div class="lg:flex">
+            <!-- Sidebar / Navigation -->
+            <aside class="lg:w-1/4 lg:h-screen lg:sticky lg:top-0 p-4 sm:p-6 lg:p-8 border-r border-stone-200">
+                <h1 class="text-2xl font-bold text-stone-900">Reactフォルダ構成</h1>
+                <p class="mt-2 text-sm text-stone-600">Python経験者向けのインタラクティブガイド</p>
+                
+                <nav class="mt-8 file-tree-nav">
+                    <ul class="space-y-1">
+                        <li><span data-target="intro">はじめに</span></li>
+                        <li>
+                            <span class="font-bold" data-target="structure">my-react-app/</span>
+                            <ul class="pl-4 mt-1 space-y-1">
+                                <li><span data-target="node_modules">├── node_modules/</span></li>
+                                <li><span data-target="public">├── public/</span></li>
+                                <li>
+                                    <span data-target="src">├── src/</span>
+                                    <ul class="pl-4 mt-1 space-y-1">
+                                        <li><span data-target="api">├── api/</span></li>
+                                        <li><span data-target="assets">├── assets/</span></li>
+                                        <li><span data-target="components">├── components/</span></li>
+                                        <li><span data-target="contexts">├── contexts/</span></li>
+                                        <li><span data-target="hooks">├── hooks/</span></li>
+                                        <li><span data-target="pages">├── pages/</span></li>
+                                        <li><span data-target="utils">├── utils/</span></li>
+                                        <li><span data-target="app_jsx">├── App.jsx</span></li>
+                                        <li><span data-target="index_jsx">└── index.jsx</span></li>
+                                    </ul>
+                                </li>
+                                <li><span data-target="gitignore">├── .gitignore</span></li>
+                                <li><span data-target="package_json">├── package.json</span></li>
+                                <li><span data-target="package_lock_json">└── package-lock.json</span></li>
+                            </ul>
+                        </li>
+                         <li><span data-target="summary">まとめ</span></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="lg:w-3/4 p-4 sm:p-6 lg:p-12">
+                <div class="space-y-16">
+                    <section id="intro" class="content-section pl-6">
+                        <h2 class="text-3xl font-bold text-stone-900">React開発へようこそ！</h2>
+                        <p class="mt-4 text-stone-700 leading-relaxed">
+                            このガイドは、Pythonでの開発経験を持つあなたが、Reactの標準的なプロジェクト構造をスムーズに理解できるよう設計されています。左側のファイルツリーをクリックすると、各項目にジャンプできます。なぜこのような構造が採用されているのか、その背景にある「思想」まで掘り下げていきましょう。
+                        </p>
+                    </section>
+
+                    <section id="structure" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">プロジェクトの全体像</h3>
+                        <p class="mt-3 text-stone-700">まずは典型的なReactプロジェクトのフォルダ構成です。この構造は、プロジェクトが成長しても破綻しにくい、拡張性の高い構成になっています。</p>
+                    </section>
+                    
+                    <section id="node_modules" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">node_modules/</h3>
+                        <p class="mt-3 text-stone-700">プロジェクトが依存するすべてのライブラリ（パッケージ）がインストールされるフォルダです。`npm install`コマンドで`package.json`を元に自動的に生成・更新されます。</p>
+                        <div class="mt-4 p-4 python-analogy rounded-lg">
+                            <p class="font-semibold text-teal-800">🐍 Pythonとの対比</p>
+                            <p class="mt-1 text-teal-700">Pythonの仮想環境（`venv`）内の`site-packages`フォルダに相当します。このフォルダは直接編集せず、Gitの管理対象からも外します。</p>
+                        </div>
+                    </section>
+
+                    <section id="public" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">public/</h3>
+                        <p class="mt-3 text-stone-700">ここに置かれたファイルは、Reactのビルドプロセスを経ずに、そのままの形でWebサーバーに公開されます。静的なアセットを置く場所です。</p>
+                        <p class="mt-2 text-stone-700">特に重要なのが `index.html` です。これはReactアプリケーションの「土台」となる唯一のHTMLファイルで、この中の`<div id="root"></div>`のような要素に対して、Reactが動的にUIを描画していきます。これを**シングルページアプリケーション(SPA)**と呼びます。</p>
+                    </section>
+
+                    <section id="src" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/</h3>
+                        <p class="mt-3 text-stone-700">開発者が書くコードは、すべてこの`src`フォルダの中に置かれます。Pythonプロジェクトで言えば、アプリケーションの本体となるパッケージディレクトリに相当します。この中の構成が、プロジェクトの保守性を大きく左右します。</p>
+                        <div class="mt-4 p-4 bg-stone-200 rounded-lg">
+                            <p class="font-semibold text-stone-800">設計思想: 関心の分離</p>
+                            <p class="mt-1 text-stone-700">`src`フォルダを細かく分けるのは「関心の分離」という思想に基づきます。役割の異なるコードを別々の場所に置くことで、コードの見通しを良くし、変更や再利用を容易にします。</p>
+                        </div>
+                    </section>
+
+                    <section id="api" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/api/</h3>
+                        <p class="mt-3 text-stone-700">外部のAPIサーバーとの通信に関する処理をまとめる場所です。データの取得（GET）、作成（POST）などを行う関数をここに置きます。コンポーネントが直接API通信の詳細を知らなくても済むようにするのが目的です。</p>
+                    </section>
+                    
+                    <section id="assets" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/assets/</h3>
+                        <p class="mt-3 text-stone-700">画像、フォント、グローバルなCSSファイルなど、ビルドプロセスに含めたいアセットファイルを置きます。JavaScriptファイル内で `import` して使用します。</p>
+                    </section>
+
+                    <section id="components" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/components/</h3>
+                        <p class="mt-3 text-stone-700">再利用可能なUI部品を置く場所です。ボタン、入力フォーム、カードなど、アプリケーションの様々な場所で使い回す小さなUIパーツをここにまとめます。`common/`（原子的な部品）や`layout/`（骨格部品）のように、さらに細分化することもあります。</p>
+                    </section>
+
+                    <section id="contexts" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/contexts/</h3>
+                        <p class="mt-3 text-stone-700">アプリケーションの広範囲で共有したい「グローバルな状態」を管理する場所です。例えば、ログインしているユーザー情報やサイト全体のテーマ（ライト/ダークモード）などです。これにより、コンポーネントの階層が深くても、propsを介さずにデータにアクセスできます（プロップスのバケツリレー問題の解決）。</p>
+                    </section>
+
+                    <section id="hooks" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/hooks/</h3>
+                        <p class="mt-3 text-stone-700">ロジックを再利用するための置き場所です。Reactでは「フック」という仕組みを使って、UIの見た目から状態管理やAPI通信などの「ロジック」を切り離すことができます。複数のコンポーネントで同じロジックが必要になった場合、それをカスタムフック（`use`で始まる関数）としてこのフォルダに切り出します。</p>
+                    </section>
+
+                    <section id="pages" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/pages/</h3>
+                        <p class="mt-3 text-stone-700">アプリケーションの「ページ」に相当する、大きな単位のコンポーネントを置きます。「ホームページ」「ユーザープロフィールページ」などがこれにあたります。`pages`のコンポーネントは、`components`フォルダにある小さな部品を組み合わせて作られます。</p>
+                    </section>
+
+                    <section id="utils" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/utils/</h3>
+                        <p class="mt-3 text-stone-700">特定の機能に依存しない、汎用的な便利関数を置きます。日付のフォーマット、金額のカンマ区切りなど、プロジェクトのどこからでも使えるヘルパー関数です。</p>
+                         <div class="mt-4 p-4 python-analogy rounded-lg">
+                            <p class="font-semibold text-teal-800">🐍 Pythonとの対比</p>
+                            <p class="mt-1 text-teal-700">Pythonプロジェクトにおける`utils.py`や`helpers.py`と全く同じ役割です。</p>
+                        </div>
+                    </section>
+                    
+                    <section id="app_jsx" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/App.jsx</h3>
+                        <p class="mt-3 text-stone-700">**ルートコンポーネント**。アプリケーション全体の「親」となるコンポーネントです。ヘッダーやフッターのような全ページ共通のレイアウトや、ページの切り替え（ルーティング）の定義などをここで行うことが多いです。</p>
+                    </section>
+
+                    <section id="index_jsx" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">src/index.jsx</h3>
+                        <p class="mt-3 text-stone-700">**エントリーポイント**、つまりアプリケーションの「起動ファイル」です。`public/index.html`の`#root`要素と、メインコンポーネントである`App.jsx`を結びつける役割を持ちます。</p>
+                        <pre class="mt-4 p-4 bg-stone-800 text-stone-100 rounded-lg overflow-x-auto text-sm"><code>// index.jsx の中身の例
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const rootElement = document.getElementById('root');
+const root = ReactDOM.createRoot(rootElement);
+
+root.render(
+  &lt;React.StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/React.StrictMode&gt;
+);</code></pre>
+                    </section>
+
+                    <section id="gitignore" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">.gitignore</h3>
+                        <p class="mt-3 text-stone-700">Gitのバージョン管理から除外するファイルやフォルダを指定します。`node_modules`やビルド生成物、環境変数ファイル（`.env`）などが一般的に含まれます。</p>
+                    </section>
+
+                    <section id="package_json" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">package.json</h3>
+                        <p class="mt-3 text-stone-700">プロジェクトの「戸籍」のようなファイル。名前、バージョンといったメタデータに加え、依存ライブラリの一覧や、`npm start`のような開発用コマンドを定義します。</p>
+                         <div class="mt-4 p-4 python-analogy rounded-lg">
+                            <p class="font-semibold text-teal-800">🐍 Pythonとの対比</p>
+                            <p class="mt-1 text-teal-700">`requirements.txt`や`pyproject.toml`に非常に近いです。</p>
+                        </div>
+                    </section>
+                    
+                    <section id="package_lock_json" class="content-section pl-6">
+                        <h3 class="text-2xl font-bold text-stone-800">package-lock.json</h3>
+                        <p class="mt-3 text-stone-700">プロジェクトの依存関係の「完全なスナップショット」です。実際にインストールされたライブラリの正確なバージョンが記録され、「自分のPCでは動いたのに…」という問題を未然に防ぐ、チーム開発における生命線です。</p>
+                    </section>
+
+                    <section id="summary" class="content-section pl-6">
+                        <h2 class="text-3xl font-bold text-stone-900">まとめ：思想と関連性</h2>
+                        <p class="mt-4 text-stone-700 leading-relaxed">
+                            このフォルダ構成の根底にあるのは、**「関心の分離」**という一貫した思想です。見た目、ロジック、外部との通信などを分離することで、コードの可読性、保守性、再利用性が向上します。この基本形を理解しておけば、どんなReactプロジェクトを見ても、その構造と意図を素早く把握できるようになるはずです。
+                        </p>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.file-tree-nav span[data-target]');
+            const sections = document.querySelectorAll('.content-section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        document.querySelectorAll('.file-tree-nav span.active').forEach(activeLink => {
+                            activeLink.classList.remove('active');
+                        });
+                        const newActiveLink = document.querySelector(`.file-tree-nav span[data-target="${id}"]`);
+                        if (newActiveLink) {
+                            newActiveLink.classList.add('active');
+                        }
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('data-target');
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        // Manually update active class on click for instant feedback
+                        document.querySelectorAll('.file-tree-nav span.active').forEach(activeLink => {
+                            activeLink.classList.remove('active');
+                        });
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

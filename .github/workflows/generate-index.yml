@@ -1,0 +1,36 @@
+name: Auto-generate index.html
+
+on:
+  push:
+    paths:
+      - "pages/**.html" # pages 配下の HTML に変更があったときだけ走る
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 全履歴があったほうが安全（コミット判定用）
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate index.html
+        run: node generate-index.mjs
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add index.html
+            git commit -m "chore: auto-update index.html"
+            git push
+          fi

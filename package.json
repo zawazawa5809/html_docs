@@ -1,0 +1,7 @@
+{
+  "name": "llm-explain-pages",
+  "type": "module",
+  "scripts": {
+    "gen": "node generate-index.mjs"
+  }
+}

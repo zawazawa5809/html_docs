@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>インタラクティブに学ぶ！スマートプロキシ入門</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: A thematic, single-page scrolling application. It starts with a simple analogy, then visually compares a 'normal' proxy with a 'smart' proxy. The core is a large interactive diagram where users can click on different functions (Routing, Caching, etc.) to see animations and read explanations. This structure guides the user from simple concepts to complex interactions in an engaging way, prioritizing understanding over mimicking the report's linear structure. A final section uses a chart to quantify a benefit (caching), reinforcing the concept. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Proxy vs Smart Proxy. Goal: Compare. Viz: Side-by-side HTML/CSS diagrams. Interaction: Hover effects. Justification: Clear visual differentiation.
+        - Report Info: Smart Proxy Functions (Routing, Caching, Auth, Logging, Transform). Goal: Organize & Inform. Viz: A central, large interactive diagram made with HTML/Tailwind. Interaction: Clicking icons updates a text panel and triggers CSS animations representing data flow. Justification: Makes abstract internal processes tangible and explorable.
+        - Report Info: Performance gain from Caching. Goal: Compare/Inform. Viz: Bar chart (Chart.js). Interaction: Static chart with clear labels. Justification: Quantifies an abstract benefit, making it concrete.
+        - Report Info: Why FastAPI? Goal: Inform. Viz: Three-column layout with Unicode icons. Interaction: Simple hover effects. Justification: Clean, scannable summary. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Noto Sans JP", sans-serif;
+        background-color: #fdfbf7;
+        color: #3d405b;
+      }
+      .flow-line {
+        position: absolute;
+        background-color: #81b29a;
+        border-radius: 2px;
+        transform-origin: left center;
+        transition: all 0.5s ease-in-out;
+        opacity: 0;
+      }
+      .flow-line.active {
+        opacity: 1;
+      }
+      .flow-dot {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background-color: #e07a5f;
+        border-radius: 50%;
+        opacity: 0;
+        transition: all 1.5s ease-in-out;
+      }
+      .flow-dot.active {
+        opacity: 1;
+      }
+      .interactive-btn {
+        transition: all 0.3s ease;
+      }
+      .interactive-btn.active,
+      .interactive-btn:hover {
+        background-color: #81b29a;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .chart-container {
+        position: relative;
+        margin: auto;
+        height: 320px;
+        width: 100%;
+        max-width: 600px;
+      }
+      @media (max-width: 640px) {
+        .chart-container {
+          height: 280px;
+        }
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <header class="text-center py-12 px-4 bg-white shadow-sm">
+      <h1 class="text-4xl md:text-5xl font-bold text-[#3D405B]">
+        インタラクティブに学ぶ！
+      </h1>
+      <h2 class="text-5xl md:text-6xl font-bold text-[#81B29A] mt-2">
+        スマートプロキシ入門
+      </h2>
+      <p class="mt-6 max-w-3xl mx-auto text-lg text-gray-600">
+        「スマートプロキシ」は、まるで優秀なコンシェルジュ。このページでは、その賢い働きを、見て、触って、理解することができます。
+      </p>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 md:py-20">
+      <!-- Section 1: What is a Proxy? -->
+      <section id="intro" class="mb-20">
+        <h3 class="text-3xl font-bold text-center mb-4">
+          そもそも「プロキシ」とは？
+        </h3>
+        <p class="text-center max-w-2xl mx-auto text-gray-600 mb-12">
+          プロキシ（Proxy）は「代理」を意味します。あなたのコンピューターの代理として、他のサーバーと通信してくれる中継役です。スマートプロキシを理解するために、まずはこの基本の形を見てみましょう。
+        </p>
+        <div
+          class="flex flex-col md:flex-row items-center justify-center gap-8 p-8 bg-white rounded-xl shadow-lg"
+        >
+          <div class="text-center">
+            <div class="text-5xl mb-2">💻</div>
+            <div class="font-bold">あなた (クライアント)</div>
+          </div>
+          <div class="text-5xl text-gray-400">→</div>
+          <div class="text-center bg-blue-100 p-6 rounded-lg">
+            <div class="text-5xl mb-2">pośrednik</div>
+            <div class="font-bold">プロキシサーバー</div>
+            <div class="text-sm text-gray-500">(ただの中継役)</div>
+          </div>
+          <div class="text-5xl text-gray-400">→</div>
+          <div class="text-center">
+            <div class="text-5xl mb-2">🌐</div>
+            <div class="font-bold">ウェブサイト (サーバー)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Interactive Smart Proxy Diagram -->
+      <section id="interactive-diagram">
+        <h3 class="text-3xl font-bold text-center mb-4">
+          「スマート」になると、どう賢くなる？
+        </h3>
+        <p class="text-center max-w-3xl mx-auto text-gray-600 mb-12">
+          ただの中継役だったプロキシに「賢い判断能力」が加わったのがスマートプロキシです。下の図の各機能ボタンをクリックして、リクエストがどのように処理されるか見てみましょう。
+        </p>
+
+        <div class="bg-white rounded-xl shadow-xl p-4 md:p-8">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Diagram -->
+            <div
+              class="lg:col-span-2 relative h-[450px] md:h-[500px] bg-gray-50 rounded-lg p-4 flex items-center justify-center"
+            >
+              <div class="w-full h-full relative">
+                <!-- Components -->
+                <div
+                  id="client"
+                  class="absolute top-1/2 left-4 md:left-8 transform -translate-y-1/2 text-center"
+                >
+                  <div class="text-5xl">💻</div>
+                  <div class="font-bold text-sm md:text-base">クライアント</div>
+                </div>
+                <div
+                  id="smart-proxy"
+                  class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-64 md:w-48 md:h-80 bg-[#81B29A] bg-opacity-20 border-2 border-dashed border-[#81B29A] rounded-xl flex flex-col items-center justify-center p-2"
+                >
+                  <div class="font-bold text-[#3D405B] text-center">
+                    スマートプロキシ
+                  </div>
+                  <div
+                    id="proxy-cache"
+                    class="mt-2 text-2xl"
+                    title="キャッシュ"
+                  >
+                    💾
+                  </div>
+                  <div id="proxy-auth" class="mt-2 text-2xl" title="認証・認可">
+                    🛡️
+                  </div>
+                  <div
+                    id="proxy-route"
+                    class="mt-2 text-2xl"
+                    title="ルーティング"
+                  >
+                    🔀
+                  </div>
+                  <div id="proxy-log" class="mt-2 text-2xl" title="ロギング">
+                    📝
+                  </div>
+                  <div
+                    id="proxy-transform"
+                    class="mt-2 text-2xl"
+                    title="形式変換"
+                  >
+                    🔄
+                  </div>
+                </div>
+                <div
+                  id="server-a"
+                  class="absolute top-1/4 right-4 md:right-8 transform -translate-y-1/2 text-center"
+                >
+                  <div class="text-5xl">📦</div>
+                  <div class="font-bold text-sm md:text-base">サーバーA</div>
+                  <div class="text-xs text-gray-500">(/products)</div>
+                </div>
+                <div
+                  id="server-b"
+                  class="absolute top-3/4 right-4 md:right-8 transform -translate-y-1/2 text-center"
+                >
+                  <div class="text-5xl">👤</div>
+                  <div class="font-bold text-sm md:text-base">サーバーB</div>
+                  <div class="text-xs text-gray-500">(/users)</div>
+                </div>
+
+                <!-- Flow Lines & Dot -->
+                <div id="flow-dot" class="flow-dot"></div>
+              </div>
+            </div>
+
+            <!-- Explanations -->
+            <div class="flex flex-col justify-center">
+              <div
+                id="explanation-box"
+                class="bg-gray-50 rounded-lg p-6 min-h-[200px] transition-all duration-300"
+              >
+                <h4
+                  id="explanation-title"
+                  class="text-xl font-bold text-[#3D405B] mb-2"
+                ></h4>
+                <p id="explanation-text" class="text-gray-600"></p>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
+                <button
+                  data-func="routing"
+                  class="interactive-btn p-3 bg-white rounded-lg shadow font-semibold text-sm"
+                >
+                  🔀 ルーティング
+                </button>
+                <button
+                  data-func="caching"
+                  class="interactive-btn p-3 bg-white rounded-lg shadow font-semibold text-sm"
+                >
+                  💾 キャッシュ
+                </button>
+                <button
+                  data-func="auth"
+                  class="interactive-btn p-3 bg-white rounded-lg shadow font-semibold text-sm"
+                >
+                  🛡️ 認証・認可
+                </button>
+                <button
+                  data-func="logging"
+                  class="interactive-btn p-3 bg-white rounded-lg shadow font-semibold text-sm"
+                >
+                  📝 ロギング
+                </button>
+                <button
+                  data-func="transform"
+                  class="interactive-btn p-3 bg-white rounded-lg shadow font-semibold text-sm"
+                >
+                  🔄 形式変換
+                </button>
+                <button
+                  data-func="reset"
+                  class="interactive-btn p-3 bg-red-100 text-red-700 rounded-lg shadow font-semibold text-sm"
+                >
+                  リセット
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Performance Chart -->
+      <section id="performance" class="mt-20">
+        <h3 class="text-3xl font-bold text-center mb-4">
+          キャッシュの効果を見てみよう
+        </h3>
+        <p class="text-center max-w-2xl mx-auto text-gray-600 mb-12">
+          スマートプロキシの機能の一つ「キャッシュ」は、システムの応答速度を劇的に改善します。一度取得したデータを記憶しておくことで、次からは瞬時に応答できるようになります。
+        </p>
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-8">
+          <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Why FastAPI? -->
+      <section id="fastapi" class="mt-20">
+        <h3 class="text-3xl font-bold text-center mb-4">
+          なぜFastAPIが向いているの？
+        </h3>
+        <p class="text-center max-w-2xl mx-auto text-gray-600 mb-12">
+          スマートプロキシのようなアプリケーションを作るのに、Pythonのフレームワーク「FastAPI」は非常に適しています。
+        </p>
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+          <div
+            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow"
+          >
+            <div class="text-4xl mb-4">🚀</div>
+            <h4 class="text-xl font-bold mb-2">高性能</h4>
+            <p class="text-gray-600">
+              非同期処理が得意で、たくさんのリクエストを高速にさばけます。
+            </p>
+          </div>
+          <div
+            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow"
+          >
+            <div class="text-4xl mb-4">✍️</div>
+            <h4 class="text-xl font-bold mb-2">開発しやすい</h4>
+            <p class="text-gray-600">
+              コードがシンプルで書きやすく、自動でドキュメントも生成してくれます。
+            </p>
+          </div>
+          <div
+            class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow"
+          >
+            <div class="text-4xl mb-4">🧩</div>
+            <h4 class="text-xl font-bold mb-2">拡張性が高い</h4>
+            <p class="text-gray-600">
+              小さく始めて、後から機能（キャッシュなど）を簡単に追加できます。
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="text-center py-8 mt-12 bg-gray-100">
+      <p class="text-gray-500">
+        スマートプロキシの基本が、少しでも身近に感じられたなら幸いです。
+      </p>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const explanations = {
+          routing: {
+            title: "🔀 賢い行き先案内（ルーティング）",
+            text: "リクエストの内容を見て、適切な転送先へ振り分けます。例えば「/products」へのアクセスはサーバーAへ、「/users」はサーバーBへ、といった具合です。複数のサービスを一つに見せかける要の機能です。",
+          },
+          caching: {
+            title: "💾 よくある質問に即答（キャッシュ）",
+            text: "一度受け取ったリクエストの結果を覚えておき、同じリクエストが来たら転送先に聞かずに即座に応答します。これによりシステム全体の表示速度が向上します。",
+          },
+          auth: {
+            title: "🛡️ 身分証の確認（認証・認可）",
+            text: "リクエストが正当なものかチェックします。「あなたは誰か？(認証)」「その操作をする権限はあるか？(認可)」を確認し、セキュリティを一元管理します。",
+          },
+          logging: {
+            title: "📝 通信の記録と監視（ロギング）",
+            text: "どんなリクエストが、いつ、どこから来たのかを記録します。システムの利用状況分析や、問題発生時の原因調査に役立ちます。",
+          },
+          transform: {
+            title: "🔄 形式の変換（トランスフォーメーション）",
+            text: "クライアントとサーバーの間でデータ形式が違う場合に、プロキシが「通訳」のように形式を変換します。古いシステムと新しいシステムを連携させる際に役立ちます。",
+          },
+          reset: {
+            title: "機能を選んでください",
+            text: "上のボタンをクリックすると、各機能のアニメーションと説明が表示されます。",
+          },
+        };
+
+        const explanationTitle = document.getElementById("explanation-title");
+        const explanationText = document.getElementById("explanation-text");
+        const buttons = document.querySelectorAll(".interactive-btn");
+        const flowDot = document.getElementById("flow-dot");
+        const proxyIcons = {
+          routing: document.getElementById("proxy-route"),
+          caching: document.getElementById("proxy-cache"),
+          auth: document.getElementById("proxy-auth"),
+          logging: document.getElementById("proxy-log"),
+          transform: document.getElementById("proxy-transform"),
+        };
+
+        let currentAnimation;
+
+        function updateExplanation(func) {
+          const content = explanations[func];
+          explanationTitle.textContent = content.title;
+          explanationText.textContent = content.text;
+
+          buttons.forEach((btn) => {
+            btn.classList.remove("active");
+            if (btn.dataset.func === func) {
+              btn.classList.add("active");
+            }
+          });
+
+          Object.values(proxyIcons).forEach(
+            (icon) => (icon.style.transform = "scale(1)")
+          );
+          if (proxyIcons[func]) {
+            proxyIcons[func].style.transform = "scale(1.5)";
+          }
+
+          animateFlow(func);
+        }
+
+        function animateFlow(func) {
+          if (currentAnimation) clearTimeout(currentAnimation);
+          flowDot.className = "flow-dot"; // Reset animation classes
+
+          const clientEl = document.getElementById("client");
+          const proxyEl = document.getElementById("smart-proxy");
+          const serverAEl = document.getElementById("server-a");
+          const serverBEl = document.getElementById("server-b");
+
+          const clientPos = {
+            x: clientEl.offsetLeft + clientEl.offsetWidth / 2,
+            y: clientEl.offsetTop + clientEl.offsetHeight / 2,
+          };
+          const proxyPos = {
+            x: proxyEl.offsetLeft + proxyEl.offsetWidth / 2,
+            y: proxyEl.offsetTop + proxyEl.offsetHeight / 2,
+          };
+          const serverAPos = {
+            x: serverAEl.offsetLeft + serverAEl.offsetWidth / 2,
+            y: serverAEl.offsetTop + serverAEl.offsetHeight / 2,
+          };
+          const serverBPos = {
+            x: serverBEl.offsetLeft + serverBEl.offsetWidth / 2,
+            y: serverBEl.offsetTop + serverBEl.offsetHeight / 2,
+          };
+
+          // Set initial position
+          flowDot.style.left = `${clientPos.x - 6}px`;
+          flowDot.style.top = `${clientPos.y - 6}px`;
+          flowDot.classList.add("active");
+
+          currentAnimation = setTimeout(() => {
+            switch (func) {
+              case "routing":
+                flowDot.style.left = `${proxyPos.x - 6}px`;
+                flowDot.style.top = `${proxyPos.y - 6}px`;
+                currentAnimation = setTimeout(() => {
+                  flowDot.style.left = `${serverAPos.x - 6}px`;
+                  flowDot.style.top = `${serverAPos.y - 6}px`;
+                }, 1500);
+                break;
+              case "caching":
+                flowDot.style.left = `${proxyPos.x - 6}px`;
+                flowDot.style.top = `${proxyPos.y - 6}px`;
+                currentAnimation = setTimeout(() => {
+                  flowDot.style.left = `${clientPos.x - 6}px`;
+                  flowDot.style.top = `${clientPos.y - 6}px`;
+                }, 1500);
+                break;
+              case "auth":
+                flowDot.style.left = `${proxyPos.x - 6}px`;
+                flowDot.style.top = `${proxyPos.y - 6}px`;
+                // Simulate rejection
+                currentAnimation = setTimeout(() => {
+                  flowDot.style.backgroundColor = "#d9534f"; // red
+                  flowDot.style.left = `${clientPos.x - 6}px`;
+                  flowDot.style.top = `${clientPos.y - 6}px`;
+                  setTimeout(() => {
+                    flowDot.style.backgroundColor = "#E07A5F";
+                  }, 1500);
+                }, 1500);
+                break;
+              case "reset":
+                flowDot.classList.remove("active");
+                break;
+              default:
+                flowDot.style.left = `${proxyPos.x - 6}px`;
+                flowDot.style.top = `${proxyPos.y - 6}px`;
+                currentAnimation = setTimeout(() => {
+                  flowDot.style.left = `${serverBPos.x - 6}px`;
+                  flowDot.style.top = `${serverBPos.y - 6}px`;
+                }, 1500);
+                break;
+            }
+          }, 100);
+        }
+
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            updateExplanation(button.dataset.func);
+          });
+        });
+
+        updateExplanation("reset");
+
+        // Chart.js implementation
+        const ctx = document
+          .getElementById("performanceChart")
+          .getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: [
+              "直接通信",
+              "通常プロキシ",
+              "スマートプロキシ (キャッシュ利用)",
+            ],
+            datasets: [
+              {
+                label: "応答時間 (ミリ秒)",
+                data: [120, 135, 15],
+                backgroundColor: [
+                  "rgba(244, 162, 97, 0.6)",
+                  "rgba(231, 111, 81, 0.6)",
+                  "rgba(129, 178, 154, 0.6)",
+                ],
+                borderColor: [
+                  "rgba(244, 162, 97, 1)",
+                  "rgba(231, 111, 81, 1)",
+                  "rgba(129, 178, 154, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              title: {
+                display: true,
+                text: "キャッシュによる応答時間の比較",
+                font: {
+                  size: 16,
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "応答時間 (ms)",
+                },
+              },
+            },
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

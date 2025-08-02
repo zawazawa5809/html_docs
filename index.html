@@ -1,9 +1,55 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <title>index.html</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>LLM Explain Pages</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        margin: 0.4rem 0;
+      }
+    </style>
+  </head>
   <body>
-    <h1>Welcome to the Index Page</h1>
-    <p>This is a simple HTML document.</p>
-    <p>Feel free to modify it as needed.</p>
+    <h1>📝 LLM Explain Pages</h1>
+    <ul id="list"></ul>
+
+    <script>
+      /* === リポジトリ設定を自分のものに書き換えるだけ === */
+      const USER = "zawazawa5809";
+      const REPO = "html_docs";
+      const BRANCH = "main";
+
+      const api = `https://api.github.com/repos/${USER}/${REPO}/contents/pages?ref=${BRANCH}`;
+
+      fetch(api, {
+        headers: { Accept: "application/vnd.github+json" }, // 推奨ヘッダ
+      })
+        .then((r) => r.json())
+        .then((entries) => {
+          const ul = document.getElementById("list");
+          entries
+            .filter((e) => e.name.endsWith(".html"))
+            .forEach((e) => {
+              const a = document.createElement("a");
+              a.href = `pages/${encodeURIComponent(e.name)}`;
+              a.textContent = e.name
+                .replace(/^\d{4}-\d{2}-\d{2}-/, "") // 日付 prefix を削る
+                .replace(/\.html$/, "") // 拡張子を削る
+                .replace(/-/g, " "); // ハイフンを空白化
+              const li = document.createElement("li");
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+        })
+        .catch(console.error);
+    </script>
   </body>
 </html>

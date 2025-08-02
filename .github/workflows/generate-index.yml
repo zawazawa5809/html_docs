@@ -3,7 +3,10 @@ name: Auto-generate index.html
 on:
   push:
     paths:
-      - "pages/**.html" # pages 配下の HTML に変更があったときだけ走る
+      - "pages/**.html"
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -13,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 全履歴があったほうが安全（コミット判定用）
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -23,7 +26,7 @@ jobs:
       - name: Generate index.html
         run: node generate-index.mjs
 
-      - name: Commit and push if changed
+      - name: Commit & push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

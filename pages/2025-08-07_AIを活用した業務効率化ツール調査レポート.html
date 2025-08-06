@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIによる業務効率化ツール調査レポート</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans JP & Noto Sans Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+    code, pre {
+      font-family: 'Noto Sans Mono', monospace;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 leading-relaxed">
+  <header class="bg-blue-700 text-white py-6">
+    <div class="max-w-7xl mx-auto px-4">
+      <h1 class="text-3xl font-bold">AIを活用した業務効率化ツール調査レポート</h1>
+      <p class="mt-2 text-sm">2025年8月7日</p>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-12">
+    <!-- 目的 -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">目的</h2>
+      <p class="mb-4">
+        後輩社員と共に、チャットGPTのような大規模言語モデル（LLM）を活用した業務効率化ツールのMVP（最低限の実用的なプロトタイプ）を開発することを目的としています。現状検討中のアイデアには、Excel設計書からMermaid図を自動生成する機能や、OutlookメールからQAシートを自動生成する機能が含まれています。本レポートでは、LLMへの効果的なプロンプト設計に関する最新の調査結果をまとめ、その他の有用なアイデアや実装計画を提案します。
+      </p>
+    </section>
+
+    <!-- プロンプト設計ベストプラクティス -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">LLMプロンプト設計のベストプラクティス</h2>
+      <h3 class="text-xl font-semibold mt-6 mb-2">プロンプトは具体的かつ構造化する</h3>
+      <p>
+        明確なコンテキストと期待する出力形式を示すことが、質の高い出力を得る上で重要です。Strapi社のガイドでは、<span class="font-semibold">明確な構造化プロンプトとコンテキスト提供が不可欠</span>であり、出力形式を指定することが推奨されています<span class="text-blue-700">[1]</span>。例えばデバッグを依頼する場合、エラーメッセージやコード片を併記し、望ましい修正方法を段階的に尋ねることで精度が向上します<span class="text-blue-700">[2]</span>。
+      </p>
+
+      <h3 class="text-xl font-semibold mt-6 mb-2">出力フォーマットを指定する</h3>
+      <p>
+        APIドキュメント生成やコードスニペット生成などの用途では、MarkdownやJSONなどの形式を明示することで、モデルが構造化された回答を返しやすくなります<span class="text-blue-700">[3]</span>。Mermaid修正用プロンプトでは、修正済みコードをコードブロックで出力し、修正点を説明した後にレンダリングを確認するよう求めています<span class="text-blue-700">[4]</span>。
+      </p>
+
+      <h3 class="text-xl font-semibold mt-6 mb-2">コンテキストと範囲を明確にする</h3>
+      <p>
+        問題の背景や制約条件を伝えることで、LLMはより正確な判断を行えます。Codecademyのチュートリアルでは、<span class="font-semibold">問題の説明・目的・エラーメッセージを具体的に示すこと</span>が重要と説明しています<span class="text-blue-700">[5]</span>。情報抽出タスクでは、抽出対象や除外対象を事前に明示することが精度向上に有効です。
+      </p>
+
+      <h3 class="text-xl font-semibold mt-6 mb-2">反復的な修正と検証</h3>
+      <p>
+        Mermaid図生成のようなタスクでは、初回の出力にエラーが含まれていても、そのフィードバックを再入力することで段階的に改善できます。Mermaid修正プロンプトでは、<span class="font-semibold">エラーの特定・修正・検証</span>を繰り返し実行することが推奨されています<span class="text-blue-700">[4]</span>。Netguruの研究でも、GPTが生成する図は軽微な修正が必要になることが多いと指摘されています<span class="text-blue-700">[6]</span>。
+      </p>
+    </section>
+
+    <!-- Mermaid図プロンプト -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">Mermaid図自動修正のプロンプト</h2>
+      <p class="mb-4">
+        GPTなどのLLMが生成するMermaidコードには、構文エラーや余計なスペースなどによるレンダリングエラーが含まれがちです<span class="text-blue-700">[6]</span>。エラーを自動修正するには、モデルに対して「コードの構文エラーを検出し修正し、修正内容を説明し、エラーがなくなるまで繰り返す」という手順を明示する必要があります<span class="text-blue-700">[4]</span>。
+      </p>
+      <div class="bg-gray-100 border border-gray-300 p-4 rounded">
+        <p class="font-semibold mb-2">プロンプト例（概要）</p>
+        <ul class="list-disc list-inside space-y-1 text-sm">
+          <li>あなたはソフトウェア設計ドキュメントのMermaid図を修正するアシスタントです。</li>
+          <li>ユーザーが提供するMermaidコードに含まれる構文エラーをすべて検出し、修正版のコードと修正理由を提示します。</li>
+          <li>修正後はMermaidとして正しくレンダリングできるか検証し、問題がある場合は再度修正します。</li>
+          <li>出力形式は、修正済みコードを<code>```mermaid```</code>ブロック内に記述し、その後に修正点と理由をMarkdown箇条書きで示します。</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- QA抽出プロンプト -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">OutlookメールからQA表を生成するプロンプト</h2>
+      <p class="mb-4">
+        Airparserの記事では、ChatGPTが柔軟な文脈理解によって人間が書いたメールから情報を抽出できることが強調されています<span class="text-blue-700">[7]</span>。メールに含まれる質問と回答を整理する際は、抽出対象・除外対象・出力形式を明確にプロンプトに含めると効果的です。
+      </p>
+      <div class="bg-gray-100 border border-gray-300 p-4 rounded">
+        <p class="font-semibold mb-2">プロンプト例（概要）</p>
+        <ul class="list-disc list-inside space-y-1 text-sm">
+          <li>ユーザーが入力するテキストは複数のメールやチャットのやり取りを含んでいる。</li>
+          <li>テキスト内の「質問」とそれに対応する「回答」をペアにして抽出し、各ペアを要約する。</li>
+          <li>挨拶文や署名など、QAに関係のない部分は無視する。</li>
+          <li>出力はNo., 質問（要約）, 回答（要約）, 依存元No., 備考の5列を持つMarkdown表とする。</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- その他アイデア -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">その他の業務効率化アイデア</h2>
+      <p class="mb-4">LLMを利用すると、Mermaid図やQA抽出以外にも様々な効率化が期待できます。下表では追加アイデアと関連するプロンプト設計ポイントを示します。</p>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto text-sm">
+          <thead class="bg-blue-100 text-blue-900">
+            <tr>
+              <th class="px-4 py-2 text-left font-semibold">アイデア</th>
+              <th class="px-4 py-2 text-left font-semibold">説明</th>
+              <th class="px-4 py-2 text-left font-semibold">プロンプト設計のポイント</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td class="px-4 py-2">会議議事録の自動要約</td>
+              <td class="px-4 py-2">音声や議事録から議題・決定事項・担当者を抽出し、Markdownの議事録を生成する。</td>
+              <td class="px-4 py-2">会議の背景と目的を明示し、出力を「概要」「決定事項」「アクションアイテム」に分けるよう指示する。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2">メール返信・ドラフト生成</td>
+              <td class="px-4 py-2">受信メールを要約し、適切な敬語とトーンで返信文案を生成する。</td>
+              <td class="px-4 py-2">メールの目的（感謝、確認など）や文体を指定し、文体を統一させる。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2">タスク抽出とチケット作成</td>
+              <td class="px-4 py-2">メールやチャットからタスク候補を抽出し、タイトル・詳細・担当者候補を提案する。</td>
+              <td class="px-4 py-2">「やるべきこと」「期限」「担当者」を抽出し、JSON形式で出力するよう求める。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2">設計書の自動チェック</td>
+              <td class="px-4 py-2">Markdown設計書の欠落項目（目的、前提条件、エラー処理など）を検出し改善案を提案する。</td>
+              <td class="px-4 py-2">期待されるセクション一覧をプロンプトに提示し、不足している部分を報告させる。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2">コードレビューとリファクタ</td>
+              <td class="px-4 py-2">コードを入力してパフォーマンス改善やセキュリティ上の問題を指摘させる。</td>
+              <td class="px-4 py-2">言語やフレームワーク、改善点（性能・可読性・セキュリティなど）を明示し、修正後のコードを求める。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2">翻訳とスタイル変換</td>
+              <td class="px-4 py-2">技術文書を英⇔日で翻訳し、専門用語や敬語を統一する。</td>
+              <td class="px-4 py-2">原文と翻訳先の言語、専門用語の取り扱い方法を指定し、表現のトーンも設定する。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 実装計画 -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">実装計画</h2>
+      <h3 class="text-xl font-semibold mt-6 mb-2">1. システム構成と技術選定</h3>
+      <p>
+        Windows環境を前提に、PythonとLLM APIを利用します。メール取得にはOutlookのCOMオブジェクト（pywin32）を用い、Mermaid図の検証には mermaid-cli を使います。APIキーの安全な管理やオンプレミスLLMの導入も検討します。
+      </p>
+      <h3 class="text-xl font-semibold mt-6 mb-2">2. Mermaid図自動修正機能</h3>
+      <ol class="list-decimal list-inside space-y-1">
+        <li>設計書から図の説明を抽出し、LLMにMermaidコード生成を依頼します。</li>
+        <li>生成されたコードを mermaid-cli で検証し、エラーがあればエラーメッセージとコードをLLMに再入力して修正します。</li>
+        <li>エラーが解消されたら、修正済みコードをMarkdownの設計書に埋め込みます。</li>
+      </ol>
+      <h3 class="text-xl font-semibold mt-6 mb-2">3. OutlookメールからQA表生成機能</h3>
+      <ol class="list-decimal list-inside space-y-1">
+        <li>Outlookフォルダから対象メールを取得し、本文・送信者・日時を連結します。</li>
+        <li>QA抽出用プロンプトにメールの全文と過去のQA一覧（存在する場合）を入力し、LLM APIを呼び出します。</li>
+        <li>結果のMarkdown表を既存のQA管理システム（Excel, Notionなど）に取り込み、依存関係をリンクします。</li>
+      </ol>
+      <h3 class="text-xl font-semibold mt-6 mb-2">4. その他機能のMVP開発</h3>
+      <p>
+        会議議事録要約やメール返信生成など、優先度の高い業務から順次プロトタイピングを進めます。処理コストやレスポンス時間を考慮し、バッチ処理やキャッシュを設計し、ユーザーからのフィードバックを基に改善を重ねます。Strapiのガイドでは、テンプレート作成やフィードバックループの構築が有用であると指摘されています<span class="text-blue-700">[8]</span>。
+      </p>
+    </section>
+
+    <!-- デザイン指針 -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">デザインガイドに基づくHTMLのポイント</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><span class="font-semibold">フォント:</span> デジタル庁デザインシステムでは可読性の高い「Noto Sans JP」と等幅の「Noto Sans Mono」を推奨しており、CSS例ではこれらをフォールバックと併せて指定しています<span class="text-blue-700">[5]</span>。</li>
+        <li><span class="font-semibold">カラー:</span> 青系のカラーパレットを基調にし、背景にはグレー系を使用してテキストとのコントラスト比を確保することが推奨されています<span class="text-blue-700">[9]</span>。</li>
+        <li><span class="font-semibold">タイポグラフィ:</span> 本文は16–45px、見出しは48–64px程度のフォントサイズを用い、行間は文字サイズの1.5倍以上とします<span class="text-blue-700">[10]</span>。</li>
+        <li><span class="font-semibold">レイアウト:</span> グリッドシステムを利用し、一貫性のある余白と行間を設けることで読みやすさとアクセシビリティを向上させます。</li>
+      </ul>
+    </section>
+
+    <!-- 結論 -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">まとめ</h2>
+      <p>
+        本レポートでは、Mermaid図修正やQA抽出をはじめとした業務効率化ツールのMVP開発に向け、LLMプロンプト設計のベストプラクティスやその他の応用アイデアをまとめました。プロンプトの具体性と構造化、情報抽出におけるコンテキスト指定、反復的な修正ループの重要性が確認されました。HTML版ではデジタル庁のデザインガイドに基づき、統一感とアクセシビリティを考慮したレイアウトを適用しています。後輩社員と共に本資料を活用し、具体的なプロンプト作成と実装を進めることで、業務全体の効率化が期待できます。
+      </p>
+    </section>
+
+    <!-- 注釈 -->
+    <section>
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">参考文献・注釈</h2>
+      <ol class="list-decimal list-inside space-y-2 text-sm">
+        <li>Strapi社の開発者向けガイドでは、明確な構造化プロンプトと出力形式の指定がLLMを強力なコーディングアシスタントに変えると述べている【585576601635867†screenshot】。</li>
+        <li>同ガイドはデバッグ時にコード片やエラーメッセージをプロンプトに含めることを推奨している【175294182273589†screenshot】。</li>
+        <li>APIドキュメント生成などでは出力形式を示すテンプレートが有効である【129815038183513†screenshot】。</li>
+        <li>DocsBotのMermaid修正プロンプトは、エラーの特定・修正・説明・検証を繰り返すよう指示している【874213180461363†L30-L33】。</li>
+        <li>Codecademyのチュートリアルでは、問題の説明・目標・エラーメッセージを具体的に示すことが重要とされる【107315096627582†L140-L144】。</li>
+        <li>Netguruの研究では、GPTが生成するMermaid図の構文エラーや出力のばらつきに注意し、図の種類・目的・構造を具体的に指定する必要があると報告されている【43028514449814†L620-L656】。</li>
+        <li>Airparserの記事は、ChatGPTが柔軟な文脈理解によりメールから情報を抽出できる利点と、単純なプロンプトで複雑なデータ抽出が可能であることを指摘している【431301751946085†L124-L174】。</li>
+        <li>Strapiガイドではテンプレート作成とフィードバックループの構築が重要であると結論づけている【133918994824077†screenshot】。</li>
+        <li>デジタル庁デザインシステムのカラーパレットは青系を中心に段階色を提供し、グレー系背景と組み合わせてコントラスト比を確保することを推奨している【334016928595461†screenshot】【439117736847895†screenshot】。</li>
+        <li>タイポグラフィのガイドでは、本文サイズ16–45px、見出しサイズ48–64px、行間は1.5倍以上を推奨している【636671290409112†screenshot】【87603827886199†screenshot】。</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="bg-gray-100 py-6">
+    <div class="max-w-7xl mx-auto px-4 text-sm text-gray-600">
+      <p>© 2025 Apex Strategy Partners. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

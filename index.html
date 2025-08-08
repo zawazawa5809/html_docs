@@ -1,139 +1,72 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="utf-8" />
-    <title>LLM Explain Pages</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <!-- Tailwind CDN（プロダクション用途なら事前ビルド推奨だが、簡易ならこれで） -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Flowbite 用（コンポーネント利用したい場合） -->
-    <link
-      href="https://unpkg.com/flowbite@1.7.0/dist/flowbite.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="bg-gray-50 text-gray-900 antialiased">
-    <div class="max-w-4xl mx-auto py-12 px-6">
-      <header
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-      >
-        <div>
-          <h1 class="text-3xl font-semibold flex items-center gap-2">
-            <span>📝</span>
-            <span>LLM Explain Pages</span>
-          </h1>
-          <p class="mt-1 text-gray-500">
-            単一 HTML 解説ページのカタログ（自動生成）
-          </p>
+<head>
+  <meta charset="utf-8" />
+  <title>LLM Explain Pages</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* optional: カスタム微調整 */
+    body {background: #f5f7fa;}
+  </style>
+</head>
+<body class="antialiased text-gray-800">
+  <div class="max-w-5xl mx-auto py-12 px-6">
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-3xl font-bold flex items-center gap-2">📝 LLM Explain Pages</h1>
+        <p class="mt-1 text-gray-500">単一 HTML 解説ページのカタログ（自動生成）</p>
+      </div>
+      <div>
+        <a href="https://github.com/zawazawa5809/html_docs" class="inline-block bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-500 transition">
+          GitHub を見る
+        </a>
+      </div>
+    </header>
+
+    <main class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      
+      <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+        <h2 class="text-lg font-semibold mb-1">2025 08 01_Reactフォルダ構成</h2>
+        <p class="text-xs text-gray-500 mb-2">2025-08-01_Reactフォルダ構成.html</p>
+        <div class="flex gap-2">
+          <a href="pages/2025-08-01_React%E3%83%95%E3%82%A9%E3%83%AB%E3%83%80%E6%A7%8B%E6%88%90.html" class="text-blue-600 hover:underline">閲覧する →</a>
         </div>
-        <div>
-          <a
-            href="https://github.com/zawazawa5809/html_docs"
-            class="inline-block bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-500 transition"
-          >
-            GitHub を見る
-          </a>
+      </div>
+    
+
+      <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+        <h2 class="text-lg font-semibold mb-1">2025 08 02_DOM Basics</h2>
+        <p class="text-xs text-gray-500 mb-2">2025-08-02_DOM Basics.html</p>
+        <div class="flex gap-2">
+          <a href="pages/2025-08-02_DOM%20Basics.html" class="text-blue-600 hover:underline">閲覧する →</a>
         </div>
-      </header>
+      </div>
+    
 
-      <main class="mt-8">
-        <div id="list" class="grid gap-4 sm:grid-cols-2"></div>
-      </main>
+      <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+        <h2 class="text-lg font-semibold mb-1">2025 08 02_SmartProxy</h2>
+        <p class="text-xs text-gray-500 mb-2">2025-08-02_SmartProxy.html</p>
+        <div class="flex gap-2">
+          <a href="pages/2025-08-02_SmartProxy.html" class="text-blue-600 hover:underline">閲覧する →</a>
+        </div>
+      </div>
+    
 
-      <footer
-        class="mt-12 text-sm text-gray-500 border-t pt-4 flex justify-between"
-      >
-        <div>最終更新: <span id="updated-at">--</span></div>
-        <div><a href="#" class="underline">フィードバック / PR</a></div>
-      </footer>
-    </div>
+      <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+        <h2 class="text-lg font-semibold mb-1">2025 08 07_AIを活用した業務効率化ツール調査レポート</h2>
+        <p class="text-xs text-gray-500 mb-2">2025-08-07_AIを活用した業務効率化ツール調査レポート.html</p>
+        <div class="flex gap-2">
+          <a href="pages/2025-08-07_AI%E3%82%92%E6%B4%BB%E7%94%A8%E3%81%97%E3%81%9F%E6%A5%AD%E5%8B%99%E5%8A%B9%E7%8E%87%E5%8C%96%E3%83%84%E3%83%BC%E3%83%AB%E8%AA%BF%E6%9F%BB%E3%83%AC%E3%83%9D%E3%83%BC%E3%83%88.html" class="text-blue-600 hover:underline">閲覧する →</a>
+        </div>
+      </div>
+    
+    </main>
 
-    <script>
-      const USER = "zawazawa5809";
-      const REPO = "html_docs";
-      const BRANCH = "main";
-
-      async function load() {
-        const api = `https://api.github.com/repos/${USER}/${REPO}/contents/pages?ref=${BRANCH}`;
-        const res = await fetch(api, {
-          headers: { Accept: "application/vnd.github+json" },
-        });
-        const entries = await res.json();
-        const listEl = document.getElementById("list");
-        entries
-          .filter((e) => e.name.endsWith(".html"))
-          .sort()
-          .forEach((e) => {
-            const title = e.name
-              .replace(/^\d{4}-\d{2}-\d{2}-/, "")
-              .replace(/\.html$/, "")
-              .replace(/-/g, " ");
-            const card = document.createElement("div");
-            card.className =
-              "bg-white p-4 rounded shadow hover:shadow-md transition";
-            card.innerHTML = `
-            <h2 class="text-lg font-medium mb-1">${title}</h2>
-            <p class="text-xs text-gray-400 mb-2">${e.name}</p>
-            <div class="flex gap-2">
-              <a href="pages/${encodeURIComponent(
-                e.name
-              )}" class="text-blue-600 hover:underline">見る →</a>
-            </div>
-          `;
-            listEl.appendChild(card);
-          });
-        document.getElementById("updated-at").textContent =
-          new Date().toLocaleString("ja-JP");
-      }
-
-      load().catch(console.error);
-    </script>
-
-    <!-- Flowbite JS（必要なら） -->
-    <script src="https://unpkg.com/flowbite@1.7.0/dist/flowbite.bundle.js"></script>
-
-    <script>
-      async function augment() {
-        const USER = "zawazawa5809";
-        const REPO = "html_docs";
-        const BRANCH = "main";
-        const api = `https://api.github.com/repos/${USER}/${REPO}/contents/pages?ref=${BRANCH}`;
-        try {
-          const res = await fetch(api, {
-            headers: { Accept: "application/vnd.github+json" },
-          });
-          const entries = await res.json();
-          const existing = new Set(
-            Array.from(document.querySelectorAll("main a")).map((a) =>
-              decodeURIComponent(a.getAttribute("href").split("/").pop())
-            )
-          );
-
-          const container = document.querySelector("main");
-          entries
-            .filter((e) => e.name.endsWith(".html") && !existing.has(e.name))
-            .sort()
-            .forEach((e) => {
-              const title = e.name
-                .replace(/^\d{4}-\d{2}-\d{2}-/, "")
-                .replace(/\.html$/, "")
-                .replace(/-/g, " ");
-              const card = document.createElement("div");
-              card.className = "bg-white p-4 rounded shadow mt-4";
-              card.innerHTML = `
-            <h2 class="text-lg font-semibold mb-1">${title}</h2>
-            <p class="text-xs text-gray-500 mb-2">${e.name} (新着)</p>
-            <a href="pages/${encodeURIComponent(
-              e.name
-            )}" class="text-blue-600 hover:underline">見る →</a>
-          `;
-              container.appendChild(card);
-            });
-        } catch (e) {
-          console.warn("差分補完失敗", e);
-        }
-      }
-      augment();
-    </script>
-  </body>
+    <footer class="mt-12 text-sm text-gray-500 border-t pt-4 flex flex-col sm:flex-row justify-between">
+      <div>最終更新: 2025/8/6 15:47:03</div>
+      <div><a href="https://github.com/your-name/llm-explain-pages" class="underline">改善や PR はこちら</a></div>
+    </footer>
+  </div>
+</body>
 </html>

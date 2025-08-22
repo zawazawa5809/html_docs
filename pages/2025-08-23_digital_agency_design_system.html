@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>デジタル庁デザインシステム実践ガイドライン</title>
+    <style>
+        :root {
+            /* Color System */
+            --primary-blue: #0066cc;
+            --primary-blue-light: #3d8bfd;
+            --primary-blue-dark: #004499;
+            
+            --secondary-blue: #cce7ff;
+            --tertiary-blue: #003366;
+            
+            --success-green: #28a745;
+            --success-green-light: #d4edda;
+            --error-red: #dc3545;
+            --error-red-light: #f8d7da;
+            --warning-yellow: #ffc107;
+            --warning-yellow-light: #fff3cd;
+            --info-cyan: #17a2b8;
+            --info-cyan-light: #d1ecf1;
+            
+            --neutral-100: #ffffff;
+            --neutral-200: #f8f9fa;
+            --neutral-300: #e9ecef;
+            --neutral-400: #dee2e6;
+            --neutral-500: #adb5bd;
+            --neutral-600: #6c757d;
+            --neutral-700: #495057;
+            --neutral-800: #343a40;
+            --neutral-900: #212529;
+            
+            /* Typography */
+            --font-family-primary: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-family-mono: 'Noto Sans Mono', 'Courier New', monospace;
+            
+            --font-size-64: 4rem;
+            --font-size-48: 3rem;
+            --font-size-32: 2rem;
+            --font-size-28: 1.75rem;
+            --font-size-24: 1.5rem;
+            --font-size-20: 1.25rem;
+            --font-size-18: 1.125rem;
+            --font-size-16: 1rem;
+            --font-size-14: 0.875rem;
+            
+            --line-height-tight: 1.2;
+            --line-height-normal: 1.5;
+            --line-height-relaxed: 1.75;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+            
+            /* Layout */
+            --header-height: 64px;
+            --sidebar-width: 280px;
+            --container-max-width: 1200px;
+            
+            /* Theme Colors */
+            --bg-primary: var(--neutral-100);
+            --bg-secondary: var(--neutral-200);
+            --text-primary: var(--neutral-900);
+            --text-secondary: var(--neutral-700);
+            --border-color: var(--neutral-300);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: var(--neutral-900);
+            --bg-secondary: var(--neutral-800);
+            --text-primary: var(--neutral-100);
+            --text-secondary: var(--neutral-300);
+            --border-color: var(--neutral-700);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-16);
+            line-height: var(--line-height-normal);
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--spacing-lg);
+        }
+        
+        .logo {
+            font-size: var(--font-size-20);
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: var(--font-size-24);
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .nav-link {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: var(--primary-blue);
+            color: var(--neutral-100);
+        }
+        
+        .nav-submenu {
+            list-style: none;
+            margin-left: var(--spacing-lg);
+            margin-top: var(--spacing-sm);
+        }
+        
+        .nav-submenu .nav-link {
+            font-size: var(--font-size-14);
+            padding: var(--spacing-xs) var(--spacing-md);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: var(--spacing-xl);
+            max-width: var(--container-max-width);
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* Typography Styles */
+        h1 { font-size: var(--font-size-48); font-weight: 700; margin-bottom: var(--spacing-lg); }
+        h2 { font-size: var(--font-size-32); font-weight: 700; margin-bottom: var(--spacing-md); }
+        h3 { font-size: var(--font-size-24); font-weight: 700; margin-bottom: var(--spacing-md); }
+        h4 { font-size: var(--font-size-20); font-weight: 700; margin-bottom: var(--spacing-sm); }
+        h5 { font-size: var(--font-size-18); font-weight: 700; margin-bottom: var(--spacing-sm); }
+        h6 { font-size: var(--font-size-16); font-weight: 700; margin-bottom: var(--spacing-sm); }
+        
+        p { margin-bottom: var(--spacing-md); }
+        
+        /* Content Sections */
+        .section {
+            margin-bottom: var(--spacing-3xl);
+        }
+        
+        .section-header {
+            border-bottom: 2px solid var(--primary-blue);
+            padding-bottom: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        /* Color Palette */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .color-category {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .color-category h4 {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .color-swatch {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .color-swatch:hover {
+            transform: translateY(-2px);
+        }
+        
+        .color-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            margin-right: var(--spacing-md);
+            border: 1px solid var(--border-color);
+        }
+        
+        .color-info {
+            flex: 1;
+        }
+        
+        .color-name {
+            font-weight: 600;
+            font-size: var(--font-size-14);
+            margin-bottom: 2px;
+        }
+        
+        .color-value {
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-14);
+            color: var(--text-secondary);
+        }
+        
+        /* Typography Demo */
+        .typography-demo {
+            background-color: var(--bg-secondary);
+            padding: var(--spacing-xl);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .font-scale {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .font-example {
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: baseline;
+            gap: var(--spacing-md);
+        }
+        
+        .font-label {
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-14);
+            color: var(--text-secondary);
+            min-width: 80px;
+        }
+        
+        /* Component Gallery */
+        .component-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+        }
+        
+        .component-demo {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .component-title {
+            margin-bottom: var(--spacing-md);
+            color: var(--primary-blue);
+        }
+        
+        .component-preview {
+            background-color: var(--bg-primary);
+            padding: var(--spacing-lg);
+            border-radius: 4px;
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Button Components */
+        .btn {
+            display: inline-block;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border: none;
+            border-radius: 4px;
+            font-size: var(--font-size-16);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: var(--neutral-100);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-blue-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--neutral-300);
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--neutral-400);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary-blue);
+            color: var(--neutral-100);
+        }
+        
+        /* Form Components */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: var(--font-size-16);
+            font-family: var(--font-family-primary);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+        }
+        
+        /* Card Component */
+        .card {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .card-header {
+            font-size: var(--font-size-18);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+        }
+        
+        /* Accessibility Indicators */
+        .accessibility-info {
+            background-color: var(--info-cyan-light);
+            border-left: 4px solid var(--info-cyan);
+            padding: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .contrast-ratio {
+            font-family: var(--font-family-mono);
+            font-weight: 600;
+            color: var(--success-green);
+        }
+        
+        /* Copy Code Button */
+        .copy-btn {
+            background-color: var(--neutral-600);
+            color: var(--neutral-100);
+            border: none;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 4px;
+            font-size: var(--font-size-14);
+            cursor: pointer;
+            margin-left: var(--spacing-sm);
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--neutral-700);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: var(--spacing-md);
+            }
+            
+            .color-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .component-gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 { font-size: var(--font-size-32); }
+            h2 { font-size: var(--font-size-24); }
+        }
+        
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-bold { font-weight: 700; }
+        .text-mono { font-family: var(--font-family-mono); }
+        .mb-0 { margin-bottom: 0; }
+        .mb-sm { margin-bottom: var(--spacing-sm); }
+        .mb-md { margin-bottom: var(--spacing-md); }
+        .mb-lg { margin-bottom: var(--spacing-lg); }
+        .mt-lg { margin-top: var(--spacing-lg); }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">デジタル庁デザインシステム</div>
+        <div class="header-controls">
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+            <button class="menu-toggle" id="menuToggle">☰</button>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#overview" class="nav-link active">概要</a>
+            </li>
+            <li class="nav-item">
+                <a href="#color-system" class="nav-link">カラーシステム</a>
+                <ul class="nav-submenu">
+                    <li class="nav-item"><a href="#key-colors" class="nav-link">キーカラー</a></li>
+                    <li class="nav-item"><a href="#semantic-colors" class="nav-link">セマンティックカラー</a></li>
+                    <li class="nav-item"><a href="#neutral-colors" class="nav-link">ニュートラルカラー</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#typography" class="nav-link">タイポグラフィ</a>
+                <ul class="nav-submenu">
+                    <li class="nav-item"><a href="#font-family" class="nav-link">フォントファミリー</a></li>
+                    <li class="nav-item"><a href="#font-scale" class="nav-link">フォントサイズ</a></li>
+                    <li class="nav-item"><a href="#line-height" class="nav-link">行間設定</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#layout-system" class="nav-link">レイアウトシステム</a>
+            </li>
+            <li class="nav-item">
+                <a href="#components" class="nav-link">UIコンポーネント</a>
+                <ul class="nav-submenu">
+                    <li class="nav-item"><a href="#buttons" class="nav-link">ボタン</a></li>
+                    <li class="nav-item"><a href="#forms" class="nav-link">フォーム</a></li>
+                    <li class="nav-item"><a href="#cards" class="nav-link">カード</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#accessibility" class="nav-link">アクセシビリティ</a>
+            </li>
+            <li class="nav-item">
+                <a href="#implementation" class="nav-link">実装ガイド</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Overview Section -->
+        <section id="overview" class="section">
+            <div class="section-header">
+                <h1>デジタル庁デザインシステム実践ガイドライン</h1>
+            </div>
+            <p>このガイドラインは、デジタル庁が公開しているデザインシステム（β版 v2.6.0）をベースに、実際のプロジェクト開発で活用できるよう体系化したものです。行政機関や公共性の高い組織のウェブサイト・アプリケーション開発における品質向上と効率化を支援します。</p>
+            
+            <div class="accessibility-info">
+                <strong>重要方針:</strong> 「誰一人取り残されない、人に優しいデジタル化」の実現のため、アクセシビリティを最優先事項として位置付けています。
+            </div>
+            
+            <h3>主要な特徴</h3>
+            <ul>
+                <li><strong>実用性重視</strong>: 実際の開発で使用できる具体的な仕様とコードサンプル</li>
+                <li><strong>アクセシビリティ準拠</strong>: WCAG 2.1/2.2、JIS X 8341-3:2016 準拠</li>
+                <li><strong>レスポンシブ対応</strong>: モバイルファーストの設計思想</li>
+                <li><strong>継続的な改善</strong>: 公式デザインシステムの更新に対応</li>
+                <li><strong>境界オブジェクト</strong>: 行政部門、外部企業、開発者が共通言語でデザインを議論</li>
+                <li><strong>汎用性</strong>: 行政組織以外でも利用可能な中立的なデザイン</li>
+            </ul>
+            
+            <h3>デザインシステムバージョン</h3>
+            <p>現在のバージョン: <strong>β版 v2.6.0</strong></p>
+        </section>
+
+        <!-- Color System Section -->
+        <section id="color-system" class="section">
+            <div class="section-header">
+                <h2>カラーシステム</h2>
+            </div>
+            <p>デジタル庁デザインシステムでは、以下の3層構造でカラーを管理し、アクセシブルで一貫性のあるカラーパレットを提供しています。</p>
+
+            <h3>カラーの基本原則</h3>
+            <p>デザインシステムのカラーは、同じ色相から明度差や彩度差で派生させることで、UI全体の統一感を維持しています。すべての色は背景とのコントラスト比を厳密に管理し、アクセシビリティ要件を満たしています。</p>
+            
+            <h3 id="key-colors">キーカラー</h3>
+            <div class="color-grid">
+                <div class="color-category">
+                    <h4>プライマリカラー</h4>
+                    <div class="color-swatch" onclick="copyColor('#0066cc')">
+                        <div class="color-box" style="background-color: #0066cc;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Primary Blue</div>
+                            <div class="color-value">#0066cc</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#3d8bfd')">
+                        <div class="color-box" style="background-color: #3d8bfd;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Primary Light</div>
+                            <div class="color-value">#3d8bfd</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#004499')">
+                        <div class="color-box" style="background-color: #004499;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Primary Dark</div>
+                            <div class="color-value">#004499</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="color-category">
+                    <h4>セカンダリカラー</h4>
+                    <div class="color-swatch" onclick="copyColor('#cce7ff')">
+                        <div class="color-box" style="background-color: #cce7ff;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Secondary Blue</div>
+                            <div class="color-value">#cce7ff</div>
+                        </div>
+                    </div>
+                    <div class="accessibility-info">
+                        <strong>コントラスト比:</strong> <span class="contrast-ratio">3:1以上</span> (UI要素)<br>
+                        <small>※セカンダリーカラーは同じ色相で明度を変え、プライマリーとの調和を保ちます</small>
+                    </div>
+                </div>
+
+                <div class="color-category">
+                    <h4>ターシャリカラー</h4>
+                    <div class="color-swatch" onclick="copyColor('#003366')">
+                        <div class="color-box" style="background-color: #003366;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Tertiary Blue</div>
+                            <div class="color-value">#003366</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 id="semantic-colors">セマンティックカラー</h3>
+            <div class="color-grid">
+                <div class="color-category">
+                    <h4>システムカラー</h4>
+                    <div class="color-swatch" onclick="copyColor('#28a745')">
+                        <div class="color-box" style="background-color: #28a745;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Success</div>
+                            <div class="color-value">#28a745</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#dc3545')">
+                        <div class="color-box" style="background-color: #dc3545;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Error</div>
+                            <div class="color-value">#dc3545</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#ffc107')">
+                        <div class="color-box" style="background-color: #ffc107;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Warning</div>
+                            <div class="color-value">#ffc107</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#17a2b8')">
+                        <div class="color-box" style="background-color: #17a2b8;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Info</div>
+                            <div class="color-value">#17a2b8</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 id="neutral-colors">ニュートラルカラー</h3>
+            <div class="color-grid">
+                <div class="color-category">
+                    <h4>グレースケール</h4>
+                    <div class="color-swatch" onclick="copyColor('#ffffff')">
+                        <div class="color-box" style="background-color: #ffffff; border: 1px solid #dee2e6;"></div>
+                        <div class="color-info">
+                            <div class="color-name">White</div>
+                            <div class="color-value">#ffffff</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#f8f9fa')">
+                        <div class="color-box" style="background-color: #f8f9fa;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 100</div>
+                            <div class="color-value">#f8f9fa</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#e9ecef')">
+                        <div class="color-box" style="background-color: #e9ecef;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 200</div>
+                            <div class="color-value">#e9ecef</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#dee2e6')">
+                        <div class="color-box" style="background-color: #dee2e6;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 300</div>
+                            <div class="color-value">#dee2e6</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#adb5bd')">
+                        <div class="color-box" style="background-color: #adb5bd;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 400</div>
+                            <div class="color-value">#adb5bd</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#6c757d')">
+                        <div class="color-box" style="background-color: #6c757d;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 500</div>
+                            <div class="color-value">#6c757d</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#495057')">
+                        <div class="color-box" style="background-color: #495057;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 600</div>
+                            <div class="color-value">#495057</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#343a40')">
+                        <div class="color-box" style="background-color: #343a40;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 700</div>
+                            <div class="color-value">#343a40</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch" onclick="copyColor('#212529')">
+                        <div class="color-box" style="background-color: #212529;"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 800</div>
+                            <div class="color-value">#212529</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography Section -->
+        <section id="typography" class="section">
+            <div class="section-header">
+                <h2>タイポグラフィシステム</h2>
+            </div>
+
+            <h3 id="font-family">フォントファミリー</h3>
+            <div class="typography-demo">
+                <h4>基本フォント</h4>
+                <p style="font-family: var(--font-family-primary); font-size: var(--font-size-18);">
+                    <strong>Noto Sans JP</strong> - デザインシステムの主要フォント<br>
+                    <span class="text-mono">font-family: 'Noto Sans JP', sans-serif;</span><br>
+                    <small>フォールバック: システム標準フォントも許容</small>
+                </p>
+                
+                <h4 class="mt-lg">等幅フォント</h4>
+                <p style="font-family: var(--font-family-mono); font-size: var(--font-size-16);">
+                    <strong>Noto Sans Mono</strong> - コードや技術的コンテンツ用<br>
+                    <code>font-family: 'Noto Sans Mono', monospace;</code>
+                </p>
+                
+                <h4 class="mt-lg">フォントウェイト</h4>
+                <ul>
+                    <li><strong>400 (Normal)</strong>: 本文テキスト標準</li>
+                    <li><strong>700 (Bold)</strong>: 見出しや強調テキスト</li>
+                    <li><strong>700以上</strong>: 必要に応じて使用可能</li>
+                </ul>
+            </div>
+
+            <h3 id="font-scale">フォントスケール</h3>
+            <div class="typography-demo">
+                <p><strong>重要:</strong> テキストの最小サイズは本文で16px。14px以下は使用しません。</p>
+                <div class="font-scale">
+                    <div class="font-example">
+                        <span class="font-label">64px</span>
+                        <h1 class="mb-0" style="font-size: var(--font-size-64);">Display Large</h1>
+                    </div>
+                    <div class="font-example">
+                        <span class="font-label">48px</span>
+                        <h1 class="mb-0" style="font-size: var(--font-size-48);">Display Medium</h1>
+                    </div>
+                    <div class="font-example">
+                        <span class="font-label">32px</span>
+                        <h2 class="mb-0" style="font-size: var(--font-size-32);">Heading 1</h2>
+                    </div>
+                    <div class="font-example">
+                        <span class="font-label">24px</span>
+                        <h3 class="mb-0" style="font-size: var(--font-size-24);">Heading 2</h3>
+                    </div>
+                    <div class="font-example">
+                        <span class="font-label">20px</span>
+                        <h4 class="mb-0" style="font-size: var(--font-size-20);">Heading 3</h4>
+                    </div>
+                    <div class="font-example">
+                        <span class="font-label">18px</span>
+                        <h5 class="mb-0" style="font-size: var(--font-size-18);">Heading 4</h5>
+                    </div>
+                    <div class="font-example">
+                        <span class="font-label">16px</span>
+                        <p class="mb-0" style="font-size: var(--font-size-16);">Body Text</p>
+                    </div>
+                    <div class="font-example">
+                        <span class="font-label">14px</span>
+                        <p class="mb-0" style="font-size: var(--font-size-14);">Small Text</p>
+                    </div>
+                </div>
+                
+                <h4 class="mt-lg">テキストスタイル規約</h4>
+                <p>スタイル名は <code>Std-17N-170</code> のように命名されます：</p>
+                <ul>
+                    <li>最初の数字: フォントサイズ (17px)</li>
+                    <li>中間の文字: ウェイト (N=Normal, B=Bold)</li>
+                    <li>最後の数字: 行間 (170%)</li>
+                </ul>
+            </div>
+
+            <h3 id="line-height">行間設定</h3>
+            <div class="typography-demo">
+                <h4>行間バリエーション</h4>
+                <div style="margin-bottom: var(--spacing-lg);">
+                    <div class="font-label">line-height: 1.2 (Tight)</div>
+                    <p style="line-height: var(--line-height-tight);">
+                        タイトルや見出しなど、コンパクトな表示が必要な場面で使用。視覚的なインパクトを重視する際に適している。
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: var(--spacing-lg);">
+                    <div class="font-label">line-height: 1.5 (Normal) - 推奨</div>
+                    <p style="line-height: var(--line-height-normal);">
+                        本文テキストに最適な行間設定。読みやすさと文字密度のバランスが取れており、長文の読書に適している。
+                    </p>
+                </div>
+                
+                <div>
+                    <div class="font-label">line-height: 1.75 (Relaxed)</div>
+                    <p style="line-height: var(--line-height-relaxed);">
+                        ゆったりとした読み心地を提供。アクセシビリティを重視する場面や、高齢者向けのインターフェースに適している。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Layout System Section -->
+        <section id="layout-system" class="section">
+            <div class="section-header">
+                <h2>レイアウトシステム</h2>
+            </div>
+            
+            <h3>グリッドシステム</h3>
+            <div class="typography-demo">
+                <h4>12カラムグリッド</h4>
+                <p>ページの左右マージン、カラム幅、カラム間のガターを統一した12カラムグリッドを基本とします。</p>
+                <ul>
+                    <li><strong>デスクトップ:</strong> 左右に余白を設けて12等分</li>
+                    <li><strong>モバイル:</strong> 1列構成に変化（レスポンシブ対応）</li>
+                </ul>
+                
+                <h4>ブレークポイント</h4>
+                <ul>
+                    <li><strong>768px以上:</strong> 複数カラムレイアウト</li>
+                    <li><strong>768px未満:</strong> 1カラムレイアウト</li>
+                </ul>
+                
+                <h4>スペーシング</h4>
+                <p><strong>基準単位: 8px</strong> - すべての余白やガターは8pxの倍数で設定</p>
+                <ul>
+                    <li>8px, 16px, 24px, 32px... の倍数で余白を設定</li>
+                    <li>小さな余白: 密接に関連する要素間</li>
+                    <li>大きな余白: セクション区切り</li>
+                </ul>
+                
+                <h4>クリック領域</h4>
+                <p>ボタンやリンクのタップターゲットは <strong>44px以上</strong> を確保（指でも押しやすく）</p>
+            </div>
+        </section>
+
+        <!-- Components Section -->
+        <section id="components" class="section">
+            <div class="section-header">
+                <h2>UIコンポーネント</h2>
+            </div>
+
+            <div class="component-gallery">
+                <!-- Buttons -->
+                <div id="buttons" class="component-demo">
+                    <h3 class="component-title">ボタンコンポーネント</h3>
+                    <div class="component-preview">
+                        <button class="btn btn-primary">プライマリボタン</button>
+                        <button class="btn btn-secondary">セカンダリボタン</button>
+                        <button class="btn btn-outline">アウトラインボタン</button>
+                    </div>
+                    <div class="accessibility-info">
+                        <strong>アクセシビリティ:</strong> フォーカス可能、適切なコントラスト比、キーボード操作対応<br>
+                        <strong>サイズ規定:</strong> Large (56px) / Medium (48px) / Small (36px)<br>
+                        <strong>タップ領域:</strong> 最低44px確保
+                    </div>
+                </div>
+
+                <!-- Forms -->
+                <div id="forms" class="component-demo">
+                    <h3 class="component-title">フォーム要素</h3>
+                    <div class="component-preview">
+                        <div class="form-group">
+                            <label for="text-input" class="form-label">テキスト入力 <span style="color: var(--error-red);">*</span></label>
+                            <input type="text" id="text-input" class="form-input" placeholder="入力してください">
+                            <small style="color: var(--text-secondary);">入力欄の幅は内容に応じて調整します</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="email-input" class="form-label">メールアドレス</label>
+                            <input type="email" id="email-input" class="form-input" placeholder="example@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="select-input" class="form-label">選択</label>
+                            <select id="select-input" class="form-input">
+                                <option>選択してください</option>
+                                <option>オプション 1</option>
+                                <option>オプション 2</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards -->
+                <div id="cards" class="component-demo">
+                    <h3 class="component-title">カードコンポーネント</h3>
+                    <div class="component-preview">
+                        <div class="card">
+                            <div class="card-header">カードタイトル</div>
+                            <p>カードの内容がここに表示されます。関連する情報を整理して表示する際に使用します。</p>
+                            <button class="btn btn-primary">詳細を見る</button>
+                        </div>
+                    </div>
+                    <div class="accessibility-info">
+                        <strong>構成要素:</strong> コンテナ、イメージエリア（省略可）、メインエリア、サブエリア<br>
+                        <strong>コントラスト:</strong> 背景とのコントラスト比3:1以上<br>
+                        <strong>注意:</strong> カード全体をクリック可能にする場合、内部に複数のリンクを配置しない
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="component-demo">
+                    <h3 class="component-title">ナビゲーション</h3>
+                    <div class="component-preview">
+                        <nav>
+                            <ul style="list-style: none; display: flex; gap: 1rem; margin: 0; padding: 0;">
+                                <li><a href="#" style="color: var(--primary-blue); text-decoration: none;">ホーム</a></li>
+                                <li><a href="#" style="color: var(--text-secondary); text-decoration: none;">サービス</a></li>
+                                <li><a href="#" style="color: var(--text-secondary); text-decoration: none;">お問い合わせ</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <!-- Tables -->
+                <div class="component-demo">
+                    <h3 class="component-title">テーブル</h3>
+                    <div class="component-preview">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: var(--neutral-200);">
+                                    <th style="padding: var(--spacing-sm); border: 1px solid var(--border-color); text-align: left; font-weight: 700;">項目</th>
+                                    <th style="padding: var(--spacing-sm); border: 1px solid var(--border-color); text-align: left; font-weight: 700;">説明</th>
+                                    <th style="padding: var(--spacing-sm); border: 1px solid var(--border-color); text-align: right; font-weight: 700;">値</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: var(--spacing-sm); border: 1px solid var(--border-color);">データセル</td>
+                                    <td style="padding: var(--spacing-sm); border: 1px solid var(--border-color);">縦方向は上寄せ</td>
+                                    <td style="padding: var(--spacing-sm); border: 1px solid var(--border-color); text-align: right;">100</td>
+                                </tr>
+                                <tr style="background-color: var(--neutral-100);">
+                                    <td style="padding: var(--spacing-sm); border: 1px solid var(--border-color);">ストライプ</td>
+                                    <td style="padding: var(--spacing-sm); border: 1px solid var(--border-color);">視認性向上</td>
+                                    <td style="padding: var(--spacing-sm); border: 1px solid var(--border-color); text-align: right;">200</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="accessibility-info">
+                        <strong>種類:</strong> 通常のテーブル、データテーブル（大量データ対応）<br>
+                        <strong>ストライプ表示:</strong> 行または列に交互の背景色<br>
+                        <strong>横スクロール:</strong> 幅がはみ出す場合は横スクロール可能に
+                    </div>
+                </div>
+
+                <div class="component-demo">
+                    <h3 class="component-title">アラート・通知</h3>
+                    <div class="component-preview">
+                        <div style="background-color: var(--success-green-light); border: 1px solid var(--success-green); padding: var(--spacing-md); border-radius: 4px; margin-bottom: var(--spacing-sm);">
+                            <strong>成功:</strong> 処理が正常に完了しました。
+                        </div>
+                        <div style="background-color: var(--error-red-light); border: 1px solid var(--error-red); padding: var(--spacing-md); border-radius: 4px; margin-bottom: var(--spacing-sm);">
+                            <strong>エラー:</strong> 入力内容に誤りがあります。
+                        </div>
+                        <div style="background-color: var(--warning-yellow-light); border: 1px solid var(--warning-yellow); padding: var(--spacing-md); border-radius: 4px;">
+                            <strong>警告:</strong> この操作は取り消せません。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Accessibility Section -->
+        <section id="accessibility" class="section">
+            <div class="section-header">
+                <h2>アクセシビリティガイドライン</h2>
+            </div>
+
+            <h3>基本方針</h3>
+            <p>「誰一人取り残されない、人に優しいデジタル化」の実現のため、以下の要件を必須とします：</p>
+
+            <div class="component-gallery">
+                <div class="component-demo">
+                    <h4>コントラスト比</h4>
+                    <ul>
+                        <li><strong>テキスト:</strong> <span class="contrast-ratio">4.5:1</span> 以上</li>
+                        <li><strong>UI要素:</strong> <span class="contrast-ratio">3:1</span> 以上</li>
+                        <li><strong>大きなテキスト:</strong> <span class="contrast-ratio">3:1</span> 以上</li>
+                    </ul>
+                </div>
+
+                <div class="component-demo">
+                    <h4>キーボード操作</h4>
+                    <ul>
+                        <li>全ての機能をキーボードで操作可能</li>
+                        <li>フォーカスインジケーターの明確な表示（黒い太線＋黄色のリング）</li>
+                        <li>論理的なタブオーダー</li>
+                        <li>フォーカス順序とDOM構造の一致</li>
+                    </ul>
+                </div>
+
+                <div class="component-demo">
+                    <h4>スクリーンリーダー対応</h4>
+                    <ul>
+                        <li>適切なセマンティックHTML</li>
+                        <li>ARIA属性の適切な使用</li>
+                        <li>alt属性の設定</li>
+                        <li>ページ構造の明確化</li>
+                    </ul>
+                </div>
+
+                <div class="component-demo">
+                    <h4>チェックリスト</h4>
+                    <div style="font-family: var(--font-family-mono); font-size: var(--font-size-14);">
+                        <div>☑ カラーコントラスト比の確認（WCAG 2.1/2.2準拠）</div>
+                        <div>☑ フォントサイズの可読性検証（最小16px）</div>
+                        <div>☑ キーボードナビゲーション動作確認</div>
+                        <div>☑ スクリーンリーダーでの読み上げテスト</div>
+                        <div>☑ フォーカス状態の視覚的表示確認</div>
+                        <div>☑ タップターゲット44px以上の確保</div>
+                        <div>☑ 色だけに頼らない情報伝達</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Implementation Section -->
+        <section id="implementation" class="section">
+            <div class="section-header">
+                <h2>実装ガイド</h2>
+            </div>
+
+            <h3>CSS Custom Properties</h3>
+            <div class="typography-demo">
+                <p>デザインシステムで使用するCSS変数の例：</p>
+                <pre style="background-color: var(--neutral-800); color: var(--neutral-100); padding: var(--spacing-md); border-radius: 4px; overflow-x: auto; font-family: var(--font-family-mono); font-size: var(--font-size-14);">:root {
+  --primary-blue: #0066cc;
+  --font-family-primary: 'Noto Sans JP', sans-serif;
+  --font-size-16: 1rem;
+  --spacing-md: 1rem;
+  --border-color: #dee2e6;
+}</pre>
+            </div>
+
+            <h3>レスポンシブブレイクポイント</h3>
+            <div class="component-gallery">
+                <div class="component-demo">
+                    <h4>モバイル</h4>
+                    <p><code>&lt; 768px</code></p>
+                    <ul>
+                        <li>シングルカラムレイアウト</li>
+                        <li>サイドバーの折りたたみ</li>
+                        <li>タッチ操作最適化</li>
+                    </ul>
+                </div>
+
+                <div class="component-demo">
+                    <h4>デスクトップ</h4>
+                    <p><code>≥ 768px</code></p>
+                    <ul>
+                        <li>マルチカラムレイアウト</li>
+                        <li>固定サイドバー</li>
+                        <li>ホバー効果</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>開発フロー</h3>
+            <ol>
+                <li><strong>デザインシステムの理解:</strong> 本ガイドラインの熟読</li>
+                <li><strong>コンポーネント選定:</strong> 目的に応じた適切なコンポーネント選択</li>
+                <li><strong>カスタマイズ:</strong> プロジェクト要件に応じた調整</li>
+                <li><strong>アクセシビリティ検証:</strong> 実装後の品質確認</li>
+                <li><strong>ユーザビリティテスト:</strong> 実際の使用感の検証</li>
+            </ol>
+            
+            <h3>Tailwind CSS統合</h3>
+            <div class="typography-demo">
+                <h4>公式プラグイン</h4>
+                <p>デジタル庁は <code>@digital-go-jp/tailwind-theme-plugin</code> を提供しており、Tailwind CSS v3/v4で利用可能です。</p>
+                <pre style="background-color: var(--neutral-800); color: var(--neutral-100); padding: var(--spacing-md); border-radius: 4px; overflow-x: auto; font-family: var(--font-family-mono); font-size: var(--font-size-14);">npm install @digital-go-jp/tailwind-theme-plugin
+
+// tailwind.config.js
+module.exports = {
+  plugins: [require('@digital-go-jp/tailwind-theme-plugin')],
+}</pre>
+                
+                <h4>React統合</h4>
+                <p>ReactプロジェクトではGitHubで公開されているサンプルコンポーネントを活用できます。</p>
+                <ul>
+                    <li>デザイントークンの管理</li>
+                    <li>コンポーネントライブラリの整備</li>
+                    <li>アクセシビリティ対応（React Aria活用）</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            
+            localStorage.setItem('theme', newTheme);
+        });
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        
+        // Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        });
+        
+        // Navigation
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                if (href.startsWith('#')) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Copy color function
+        function copyColor(color) {
+            navigator.clipboard.writeText(color).then(() => {
+                // Show feedback
+                const feedback = document.createElement('div');
+                feedback.textContent = `Copied: ${color}`;
+                feedback.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--success-green);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    z-index: 9999;
+                    font-size: 14px;
+                `;
+                document.body.appendChild(feedback);
+                
+                setTimeout(() => {
+                    feedback.remove();
+                }, 2000);
+            });
+        }
+        
+        // Intersection Observer for navigation highlighting
+        const observerOptions = {
+            rootMargin: '-50px 0px -50% 0px',
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    const link = document.querySelector(`.nav-link[href="#${id}"]`);
+                    if (link) {
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                    }
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all sections
+        document.querySelectorAll('section[id]').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // Auto-close mobile menu on link click
+        if (window.innerWidth <= 768) {
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('expanded');
+                });
+            });
+        }
+        
+        // Responsive handling
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('open', 'collapsed');
+                mainContent.classList.remove('expanded');
+            } else {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            }
+        });
+    </script>
+</body>
+</html>
